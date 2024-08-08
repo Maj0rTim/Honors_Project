@@ -15,6 +15,16 @@ public class MessageQueueOutputChannel
         System.err.println("MessageQueueOutputStream: msgget failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
     } // constructor
 
+    private void sendData (byte[]buf, int len) throws IOException
+    { 
+        if (ipc.msgsnd(msgqid, QUEUE_TYPE, buf, len, 0) == -1)
+          throw new IOException("MessageQueueOutputStream: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
+    } 
+
+    public void write (byte[] data) throws IOException
+    { 
+        
+    } 
     
     
 }

@@ -13,25 +13,23 @@ public class NamedPipeChannel
     public static final int PERMISSIONS = 0660;
 
     public NamedPipeChannel() {
-        if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded for ping2pong"); }
+        if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
     }   
     
-    public String read() throws IOException {
-        String data = null;
+    public byte[] read() throws IOException {
         Path filePath = Paths.get(PATH);
         try (FileChannel channel = FileChannel.open(filePath, StandardOpenOption.READ)) {
             ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
             channel.read(buffer);
             buffer.flip();
-            if (buffer.hasArray()) { data = new String(buffer.array()); }
+            if (buffer.hasArray()) { return buffer.array(); }
             else { throw new IOException("No data to read"); }
         }
-        return data;
     }
 
-    public void write(String data) throws IOException {
-        ByteBuffer buffer = ByteBuffer.wrap(data.getBytes());
+    public void write(byte[] data) throws IOException {
+        ByteBuffer buffer = ByteBuffer.wrap(data);
         Path filePath = Paths.get(PATH);
         try (FileChannel channel = FileChannel.open(filePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) 
         {
