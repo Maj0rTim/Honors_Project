@@ -18,7 +18,7 @@ public class MessageQueueOutputChannel
     private void sendData(ByteBuffer buffer) throws IOException
     {
         if (buffer.hasArray()) {
-            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer.array(), buffer.position(), 0) == -1)
+            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer.array(), buffer.capacity(), 0) == -1)
               throw new IOException("MessageQueueOutputStream: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
         } else { throw new IOException("Buffer is empty"); }
     } 
