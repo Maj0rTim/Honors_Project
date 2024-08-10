@@ -22,17 +22,18 @@ public class NamedPipeChannel
         channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }   
     
-    public void fillBuffer() throws IOException {
+    private void retrieveBuffer() throws IOException {
         buffer = ByteBuffer.allocate((int) channel.size());
         channel.read(buffer);
     }
 
-    public byte[] readBuffer() throws IOException{
+    public byte[] read() throws IOException {
+        retrieveBuffer();
         if (buffer.hasArray()) { return buffer.array(); }
         else { throw new IOException("No data in buffer"); }        
     }
 
-    public void writeBuffer(byte[] data) throws IOException {
+    public void write(byte[] data) throws IOException {
         buffer = ByteBuffer.wrap(data);
         if  (buffer.hasRemaining()) { channel.write(buffer); }
         else { throw new IOException("Supplied no data"); }
