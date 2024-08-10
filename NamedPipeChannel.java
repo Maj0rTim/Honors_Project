@@ -19,7 +19,7 @@ public class NamedPipeChannel
         if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
         Path filePath = Paths.get(PATH);
-        channel = FileChannel.open(filePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.READ);
+        channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }   
     
     public void fillBuffer() throws IOException {
@@ -32,9 +32,10 @@ public class NamedPipeChannel
         else { throw new IOException("No data in buffer"); }        
     }
 
-    public void write(byte[] data) throws IOException {
+    public void writeBuffer(byte[] data) throws IOException {
         buffer = ByteBuffer.wrap(data);
-        while (buffer.hasRemaining()) { channel.write(buffer); }
+        if  (buffer.hasRemaining()) { channel.write(buffer); }
+        else { throw new IOException("Supplied no data"); }
         
     }
 }
