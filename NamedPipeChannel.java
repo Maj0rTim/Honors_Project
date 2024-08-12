@@ -10,8 +10,9 @@ public class NamedPipeChannel
 {
     private LinuxIPC ipc = new LinuxIPC();
     private final String PATH = "/tmp/fifo_temp";
-    private final int PERMISSIONS = 0660;
-    private ByteBuffer buffer;
+    private static final int PERMISSIONS = 0660;
+    private static final int MAX_BUF_SIZE = 4096;
+    private ByteBuffer buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     private FileChannel channel;
     
 
@@ -21,22 +22,23 @@ public class NamedPipeChannel
         Path filePath = Paths.get(PATH);
         channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }   
-    
-    private void retrieveBuffer() throws IOException {
-        buffer = ByteBuffer.allocate((int) channel.size());
-        channel.read(buffer);
-    }
 
     public byte[] read() throws IOException {
-        retrieveBuffer();
+        buffer.clear();
+        channel.read(buffer);
         if (buffer.hasArray()) { return buffer.array(); }
         else { throw new IOException("No data in buffer"); }        
     }
 
     public void write(byte[] data) throws IOException {
-        buffer = ByteBuffer.wrap(data);
-        if  (buffer.hasRemaining()) { channel.write(buffer); }
-        else { throw new IOException("Supplied no data"); }
+        buffer.clear();
+        buffer.put(data);
+        buffer.flip();
+        while (buffer.hasRemaining()) { channel.write(buffer); }
         
+    }
+
+    public void close() throws IOException {
+        channel.close();
     }
 }

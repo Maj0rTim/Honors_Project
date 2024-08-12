@@ -9,8 +9,7 @@ public class MessageQueueChannel
     private int key;
     private int msgqid;
     private int dataSize;
-    private byte[] data = new byte[MAX_BUF_SIZE];
-    private ByteBuffer buffer;
+    private ByteBuffer buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     private LinuxIPC ipc = new LinuxIPC();
     
     public MessageQueueChannel() { 
@@ -21,21 +20,18 @@ public class MessageQueueChannel
         System.err.println("MessageQueueOutputStream: msgget failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
     }
 
-    private void retrieveBuffer() throws IOException {
-        if ((dataSize = ipc.msgrcv(msgqid, data, MAX_BUF_SIZE, QUEUE_TYPE, 0)) == -1)
-        { throw new IOException("MessageQueueInputStream: fillBuffer failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
-        buffer = ByteBuffer.wrap(data);
-    }
-
     public byte[] read() throws IOException {
-        retrieveBuffer();
-        return buffer.get(data, 0, dataSize).array();
+        if ((dataSize = ipc.msgrcv(msgqid, buffer, MAX_BUF_SIZE, QUEUE_TYPE, 0)) == -1) { 
+            throw new IOException("MessageQueueInputStream: fillBuffer failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
+        }
+        return buffer.array();
     }
 
     private void sendData(ByteBuffer buffer) throws IOException {
         if (buffer.hasArray()) {
-            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer.array(), buffer.capacity(), 0) == -1)
+            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer, buffer.capacity(), 0) == -1) {
               throw new IOException("MessageQueueOutputStream: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
+            }
         } else { throw new IOException("Buffer is empty"); }
     } 
 
