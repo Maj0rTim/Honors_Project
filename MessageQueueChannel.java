@@ -12,7 +12,7 @@ public class MessageQueueChannel
     private int dataSize;
     private ByteBuffer buffer;
     private ByteChannel channel;
-    private LinuxIPC ipc = new LinuxIPC();
+    private LinuxNIPC ipc = new LinuxNIPC();
     
     public MessageQueueChannel() { 
         if ((key = ipc.ftok(path, 'a')) != -1) { 
