@@ -15,7 +15,6 @@ public class NamedPipeChannel
     private ByteBuffer buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     private FileChannel channel;
     
-
     public NamedPipeChannel() throws IOException {
         if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
