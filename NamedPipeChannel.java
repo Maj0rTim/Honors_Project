@@ -24,17 +24,23 @@ public class NamedPipeChannel
 
     public byte[] read() throws IOException {
         buffer.clear();
-        channel.read(buffer);
-        if (buffer.hasArray()) { return buffer.array(); }
-        else { throw new IOException("No data in buffer"); }        
+        int bytesRead = channel.read(buffer);
+        if (bytesRead == -1) { throw new IOException("End of stream reached"); }
+        buffer.flip();
+        byte[] data = new byte[buffer.remaining()];
+        buffer.get(data);
+        return data;
     }
 
     public void write(byte[] data) throws IOException {
-        buffer.clear();
-        buffer.put(data);
-        buffer.flip();
-        while (buffer.hasRemaining()) { channel.write(buffer); }
-        
+        int position = 0;
+        while (position < MAX_BUF_SIZE) {
+            buffer.clear();
+            buffer.put(data, position, MAX_BUF_SIZE);
+            buffer.flip();
+            while (buffer.hasRemaining()) { channel.write(buffer); }
+            position += MAX_BUF_SIZE;
+        }
     }
 
     public void close() throws IOException {
