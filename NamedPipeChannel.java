@@ -16,7 +16,7 @@ public class NamedPipeChannel
     private FileChannel channel;
     
     public NamedPipeChannel() throws IOException {
-        if (ipc. (PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
+        if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
         Path filePath = Paths.get(PATH);
         channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
