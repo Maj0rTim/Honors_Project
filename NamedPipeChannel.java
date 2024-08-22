@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class NamedPipeChannel
 {
-    private LinuxIPC ipc = new LinuxIPC();
+    private LinuxNIPC ipc = new LinuxNIPC();
     private final String PATH = "/tmp/fifo_temp";
     private static final int PERMISSIONS = 0660;
     private static final int MAX_BUF_SIZE = 4096;

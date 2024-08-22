@@ -10,7 +10,7 @@
 #include <linux/msg.h>
 
 
-#include "LinuxIPC.h"
+#include "LinuxNIPC.h"
 
 void setErrnum (JNIEnv *, jobject, int);
 
