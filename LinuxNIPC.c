@@ -88,3 +88,13 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgrcv (JNIEnv * env, jobject obj, jint id
     
     return num;
 }
+
+JNIEXPORT jint JNICALL Java_LinuxIPC_msgRmid (JNIEnv * env, jobject obj, jint msgqid)
+{ 
+    if (msgctl(msgqid, IPC_RMID, 0) == -1) { 
+        setErrnum(env, obj, errno);
+        return(-1);
+    }
+    return 0;
+}
+

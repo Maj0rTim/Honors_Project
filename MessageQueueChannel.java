@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
 
 public class MessageQueueChannel 
 {
@@ -11,7 +10,6 @@ public class MessageQueueChannel
     private int msgqid;
     private int dataSize;
     private ByteBuffer buffer;
-    private ByteChannel channel;
     private LinuxNIPC ipc = new LinuxNIPC();
     
     public MessageQueueChannel() { 
@@ -55,5 +53,8 @@ public class MessageQueueChannel
         sendData(buffer.get(data, off, len));
     } 
     
+    public void close() throws IOException {
+        ipc.msgRmid(msgqid);
+    }
     
 }
