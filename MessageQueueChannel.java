@@ -22,6 +22,7 @@ public class MessageQueueChannel
     }
 
     public int fillBuffer() throws IOException {
+        buffer.clear();
         if ((dataSize = ipc.msgrcv(msgqid, QUEUE_TYPE, buffer, MAX_BUF_SIZE, 0)) == -1) { 
             throw new IOException("MessageQueueInput: fillBuffer failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
         }
@@ -29,7 +30,10 @@ public class MessageQueueChannel
     }
 
     public byte[] read(int length) throws IOException{
-        return buffer.array();
+        buffer.flip();
+        byte[] data = new byte[buffer.remaining()];
+        buffer.get(data);
+        return data;
     }
 
 

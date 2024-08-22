@@ -77,7 +77,7 @@ public class LinuxNIPC
     /** Create a new message queue.  See the man page for <CODE>msgget()</CODE>
       * for more details.
       * @param key An identifier to be used for this queue.
-      * @param msgflg The flags to be used for this queue (IPC_CREAT or
+      * @param flags The flags to be used for this queue (IPC_CREAT or
       * IPC_EXCL).
       */
     public native int msgget (int key, int flags);
@@ -87,10 +87,10 @@ public class LinuxNIPC
       * @param msgqid The message queue identifier (obtained from
       * <CODE>msgget()</CODE>).
       * @param type The message type.
-      * @param msg The message to be sent.
-      * @param msgsz The size of the message.  Only this number of bytes from
+      * @param buffer the java.nio ByteBuffer where the message will be copied from.
+      * @param length The size of the message.  Only this number of bytes from
       * msg will be sent.  If the size is negative, all of msg will be sent.
-      * @param msgflg The flags to be used for this queue (IPC_NOWAIT).
+      * @param flags The flags to be used for this queue (IPC_NOWAIT).
       * @returns 
       */
     public native int msgsnd (int msgqid, int type, ByteBuffer buffer, int length, int flags);
@@ -100,18 +100,18 @@ public class LinuxNIPC
       * <CODE>msgrcv()</CODE> for more details.
       * @param msgqid The message queue identifier (obtained from
       * <CODE>msgget()</CODE>).
-      * @param msg The message received.
-      * @param msgsz The size of the message.  The received message is
-      * truncated to msgsz bytes if it is larger than msgsz and
-      * (msgflg & MSG_NOERROR) is non-zero. The truncated part of the message
-      * is lost, and no indication of the truncation is given to the calling
-      * process.
       * @param type The message type. If type is 0, the first message on the
       * queue is received. If type is greater than 0, the first message of
       * type type is received. If type is less than 0, the first message
       * of the lowest type that is less than or equal to the absolute value
       * of type is received. 
-      * @param msgflg The flags to be used for this queue (IPC_NOWAIT, or
+      * @param buffer the java.nio ByteBuffer where the message will be copied to.
+      * @param length The size of the message.  The received message is
+      * truncated to msgsz bytes if it is larger than msgsz and
+      * (msgflg & MSG_NOERROR) is non-zero. The truncated part of the message
+      * is lost, and no indication of the truncation is given to the calling
+      * process.
+      * @param flags The flags to be used for this queue (IPC_NOWAIT, or
       *   MSG_NOERROR).
       * @returns If successful, the number of bytes actually placed into msg.
       *   On failure, -1 (errnum has the Linux error code).
