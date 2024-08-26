@@ -9,16 +9,15 @@ import java.nio.file.Paths;
 public class NamedPipeChannel
 {
     private LinuxNIPC ipc = new LinuxNIPC();
-    private final String PATH = "/tmp/fifo_temp";
     private static final int PERMISSIONS = 0660;
     private static final int MAX_BUF_SIZE = 4096;
     private ByteBuffer buffer;
     private FileChannel channel;
     
-    public NamedPipeChannel() throws IOException {
-        if (ipc.mkfifo(PATH, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
+    public NamedPipeChannel(String path) throws IOException {
+        if (ipc.mkfifo(path, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
-        Path filePath = Paths.get(PATH);
+        Path filePath = Paths.get(path);
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
         channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }   
