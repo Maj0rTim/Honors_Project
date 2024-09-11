@@ -21,21 +21,15 @@ public class MessageQueueChannel
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     }
 
-    public int fillBuffer() throws IOException {
+    public Long read() throws IOException {
         buffer.clear();
         if ((dataSize = ipc.msgrcv(msgqid, QUEUE_TYPE, buffer, MAX_BUF_SIZE, 0)) == -1) { 
-            throw new IOException("MessageQueueInput: fillBuffer failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
+            throw new IOException("MessageQueueInput: read failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
         }
-        return dataSize;
-    }
-
-    public byte[] read(int length) throws IOException{
         buffer.flip();
-        byte[] data = new byte[buffer.remaining()];
-        buffer.get(data);
+        Long data = buffer.getLong();
         return data;
     }
-
 
     private void sendData(ByteBuffer buffer) throws IOException {
         if (buffer.hasArray()) {
@@ -45,16 +39,10 @@ public class MessageQueueChannel
         } else { throw new IOException("Buffer is empty"); }
     } 
 
-    public void write(byte[] data) throws IOException { 
+    public void write(Long data) throws IOException { 
         buffer.clear();
-        buffer.put(data);
+        buffer.putLong(data);
         sendData(buffer);
-    } 
-
-    public void write(byte[] data, int off, int len) throws IOException { 
-        buffer.clear();
-        buffer.put(data);
-        sendData(buffer.get(data, off, len));
     } 
     
     public void close() throws IOException {
