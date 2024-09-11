@@ -22,23 +22,22 @@ public class NamedPipeChannel
         channel = FileChannel.open(filePath, StandardOpenOption.WRITE, StandardOpenOption.READ);
     }   
 
-    public Long read() throws IOException {
+    public long readLong() throws IOException {
         buffer.clear();
         int bytesRead = channel.read(buffer);
-        if (bytesRead == -1) { throw new IOException("End of stream reached"); }
+        if (bytesRead == -1) {
+            throw new IOException("End of stream reached");
+        }
         buffer.flip();
-        Long data = buffer.getLong();
-        return data;
+        return buffer.getLong();
     }
 
-    public void write(Long data) throws IOException {
-        int position = 0;
-        while (position < buffer.capacity()) {
-            buffer.clear();
-            buffer.putLong(position, data);
-            buffer.flip();
-            while (buffer.hasRemaining()) { channel.write(buffer); }
-            position += MAX_BUF_SIZE;
+    public void writeLong(long data) throws IOException {
+        buffer.clear();
+        buffer.putLong(data);
+        buffer.flip();
+        while (buffer.hasRemaining()) {
+            channel.write(buffer);
         }
     }
 
