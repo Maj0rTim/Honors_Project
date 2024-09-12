@@ -31,18 +31,17 @@ public class MessageQueueChannel
         return data;
     }
 
-    private void sendData(ByteBuffer buffer) throws IOException {
-        if (buffer.hasArray()) {
-            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer, buffer.capacity(), 0) == -1) {
-              throw new IOException("MessageQueueOutput: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
-            }
-        } else { throw new IOException("Buffer is empty"); }
-    } 
-
     public void write(Long data) throws IOException { 
         buffer.clear();
         buffer.putLong(data);
-        sendData(buffer);
+        if (buffer.hasArray()) {
+            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer, buffer.capacity(), 0) == -1) {
+                throw new IOException("MessageQueueOutput: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
+            }
+        } else { 
+            throw new IOException("Buffer is empty"); 
+        }
+        
     } 
     
     public void close() throws IOException {
