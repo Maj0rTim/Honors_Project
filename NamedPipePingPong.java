@@ -10,8 +10,8 @@ public class NamedPipePingPong {
     
     public NamedPipePingPong(String myName) throws IOException {
         if (myName.equals("Ping")) {
-            yourName = "Pong";
             pipe = new NamedPipeChannel(PING2PONG);
+            yourName = "Pong";
         } else if (myName.equals("Pong")) {
             yourName = "Ping";
             pipe = new NamedPipeChannel(PONG2PING);
@@ -19,38 +19,28 @@ public class NamedPipePingPong {
     }
 
     public void playSimulation(int rounds) throws IOException {
+        setChannels();
         synchronize();
-        
-        long totalRoundTripTime = 0;
-        for (int i = 0; i < rounds; i++) {
-            long roundTripTime = measureRoundTripTime();
-            totalRoundTripTime += roundTripTime;
-            System.out.println(myName + " - Round " + (i + 1) + " round-trip time: " + roundTripTime + " ms");
-        }
-        
+    }
+
+    private void setChannels() throws IOException {
         if (myName.equals("Ping")) {
-            System.out.println("Average round-trip time: " + (totalRoundTripTime / rounds) + " ms");
+            pipe.setWriteChannel(PING2PONG);
+            pipe.setReadChannel(PONG2PING);
+        } else {
+            pipe.setReadChannel(PING2PONG);
+            pipe.setWriteChannel(PING2PONG);
         }
     }
 
     private void synchronize() throws IOException {
         if (myName.equals("Ping")) {
-            pipe.writeLong(System.nanoTime());
-            pipe.readLong();
+
         } else {
-            pipe.readLong();
-            pipe.writeLong(System.nanoTime());
+            
         }
     }
     
-    private long measureRoundTripTime() throws IOException {
-        long startTime = System.nanoTime();
-        pipe.writeLong(startTime);
-        long responseTime = pipe.readLong();
-        long endTime = System.nanoTime();
-        return (endTime - startTime) / 1_000_000;
-    }
-
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         if (args.length != 2) {
             System.out.println("Usage: java NamedPipePingPong <Ping|Pong> <rounds>");
