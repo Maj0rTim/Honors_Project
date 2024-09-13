@@ -39,46 +39,6 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_mkfifo
 
 /*
  * Class:     LinuxNIPC
- * Method:    ftok
- * Signature: (Ljava/lang/String;C)I
- */
-JNIEXPORT jint JNICALL Java_LinuxNIPC_ftok
-  (JNIEnv *, jobject, jstring, jchar);
-
-/*
- * Class:     LinuxNIPC
- * Method:    msgget
- * Signature: (II)I
- */
-JNIEXPORT jint JNICALL Java_LinuxNIPC_msgget
-  (JNIEnv *, jobject, jint, jint);
-
-/*
- * Class:     LinuxNIPC
- * Method:    msgsnd
- * Signature: (IILjava/nio/ByteBuffer;II)I
- */
-JNIEXPORT jint JNICALL Java_LinuxNIPC_msgsnd
-  (JNIEnv *, jobject, jint, jint, jobject, jint, jint);
-
-/*
- * Class:     LinuxNIPC
- * Method:    msgrcv
- * Signature: (IILjava/nio/ByteBuffer;II)I
- */
-JNIEXPORT jint JNICALL Java_LinuxNIPC_msgrcv
-  (JNIEnv *, jobject, jint, jint, jobject, jint, jint);
-
-/*
- * Class:     LinuxNIPC
- * Method:    msgRmid
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid
-  (JNIEnv *, jobject, jint);
-
-/*
- * Class:     LinuxNIPC
  * Method:    strerror
  * Signature: (I)Ljava/lang/String;
  */

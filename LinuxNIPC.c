@@ -9,7 +9,6 @@
 #include <linux/ipc.h>
 #include <linux/msg.h>
 
-
 #include "LinuxNIPC.h"
 
 void setErrnum (JNIEnv *, jobject, int);
@@ -17,7 +16,7 @@ void setErrnum (JNIEnv *, jobject, int);
 typedef struct message_buffer { 
     long type;
     char message;
-}
+} mb;
 
 JNIEXPORT jint JNICALL Java_LinuxNIPC_mkfifo (JNIEnv *env, jobject obj, jstring name, jint perms) {
     jboolean iscopy;
