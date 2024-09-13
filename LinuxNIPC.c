@@ -42,4 +42,18 @@ JNIEXPORT jstring JNICALL Java_LinuxNIPC_strerror (JNIEnv *env, jobject obj, jin
 }
 
 
-
+void setErrnum (JNIEnv *env, jobject obj, int errnum) { 
+    jclass cls = (*env)->GetObjectClass(env, obj);
+    jmethodID mid = (*env)->GetMethodID(env, cls, "setErrnum", "(I)V");
+    if (mid == 0) { 
+        printf("Can't find method setErrnum\n");
+        return;
+    }
+    (*env)->ExceptionClear(env);
+    (*env)->CallVoidMethod(env, obj, mid, errnum);
+    if ((*env)->ExceptionOccurred(env)) { 
+        printf("Error occured calling setErrnum\n");
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+    }
+}
