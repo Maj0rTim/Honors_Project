@@ -7,6 +7,7 @@ public class NamedPipePingPong {
     private NamedPipeChannel pipe;
     private String myName;
     private String yourName;
+    private Long Total = 0L;
     
     public NamedPipePingPong(String myName) throws IOException {
         if (myName.equals("Ping")) {
@@ -21,6 +22,7 @@ public class NamedPipePingPong {
     public void playSimulation(int rounds) throws IOException {
         setChannels();
         synchronize();
+        getRoundTripTime(rounds);
     }
 
     private void setChannels() throws IOException {
@@ -29,16 +31,49 @@ public class NamedPipePingPong {
             pipe.setReadChannel(PONG2PING);
         } else {
             pipe.setReadChannel(PING2PONG);
-            pipe.setWriteChannel(PING2PONG);
+            pipe.setWriteChannel(PONG2PING);
         }
     }
 
     private void synchronize() throws IOException {
         if (myName.equals("Ping")) {
-
+            pipe.writeLong(0);
+            pipe.readLong();
         } else {
-            
+            pipe.readLong();
+            pipe.writeLong(0);
         }
+    }
+
+    private void getRoundTripTime(int rounds) throws IOException {
+        for (int i=0; i<rounds; i++) {
+            if (myName.equals("Ping")) {
+                pingThrowBall();
+                Total += pingCatchBall(); 
+                
+            } else {
+                Long time = pongCatchBall();
+                pongThrowBall(time);
+            }
+        }
+        System.err.printf("Total round trip time: %L for rounds: %d", Total, rounds);
+    }
+
+    private void pingThrowBall() throws IOException {
+        Long time = System.currentTimeMillis();
+        pipe.writeLong(time);
+    }
+
+    private Long pingCatchBall() throws IOException {
+        return pipe.readLong();
+    }
+
+    private void pongThrowBall(Long time) throws IOException {
+        pipe.writeLong(time);
+    }
+
+    private Long pongCatchBall() throws IOException {
+        return pipe.readLong();
     }
     
     public static void main(String[] args) throws IOException, ClassNotFoundException {
