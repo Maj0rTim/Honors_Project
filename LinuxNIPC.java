@@ -95,20 +95,20 @@ public class LinuxNIPC
       * @param msgqid The message queue identifier (obtained from
       * <CODE>msgget()</CODE>).
       * @param type The message type.
-      * @param msg The message to be sent.
+      * @param buffer the direct buffer where the message will be copied from.
       * @param msgsz The size of the message.  Only this number of bytes from
       * msg will be sent.  If the size is negative, all of msg will be sent.
       * @param msgflg The flags to be used for this queue (IPC_NOWAIT).
       * @returns 
       */
-    public native int msgsnd (int msqid, int type, byte[] msg, int msgsz, int msgflg);
+    public native int msgsnd (int msqid, ByteBuffer buffer, int msgsz, int type, int msgflg);
     
     
     /** Receive a message using a message queue.  See the man page for
       * <CODE>msgrcv()</CODE> for more details.
       * @param msgqid The message queue identifier (obtained from
       * <CODE>msgget()</CODE>).
-      * @param msg The message received.
+      * @param buffer the direct buffer where the message will be copied too.
       * @param msgsz The size of the message.  The received message is
       * truncated to msgsz bytes if it is larger than msgsz and
       * (msgflg & MSG_NOERROR) is non-zero. The truncated part of the message
@@ -124,7 +124,7 @@ public class LinuxNIPC
       * @returns If successful, the number of bytes actually placed into msg.
       *   On failure, -1 (errnum has the Linux error code).
       */
-    public native int msgrcv (int msgqid, byte[] msg, int msgsz, int type, int msgflg);
+    public native int msgrcv (int msgqid, ByteBuffer buffer, int msgsz, int type, int msgflg);
 
     /** Remove an IPC message queue.  See the man page for
       * <CODE>msgctl()</CODE> for more details.

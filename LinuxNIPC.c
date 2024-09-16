@@ -6,17 +6,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <linux/stat.h>
-#include <linux/ipc.h>
-#include <linux/msg.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 #include "LinuxNIPC.h"
 
 void setErrnum (JNIEnv *, jobject, int);
 
 typedef struct message_buffer { 
-    long type;
-    char message[];
-} mb;
+    long mtype;
+    char msg;
+} msgbuf;
 
 JNIEXPORT jint JNICALL Java_LinuxNIPC_mkfifo (JNIEnv *env, jobject obj, jstring name, jint perms) {
     jboolean iscopy;
@@ -129,6 +129,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_msgrcv(JNIEnv *env, jobject obj, jint msgqi
     return retval;
 }
 
+/*
 JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;
     int semid;
@@ -179,12 +180,7 @@ JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject
         if (semctl(semid, READ_SEM, SETVAL, semopts) == -1) {
             setErrnum(env, obj, errno);
         }
-      }
-  }
-
-JNIEXPORT jstring JNICALL Java_LinuxNIPC_strerror (JNIEnv *env, jobject obj, jint errnum) {
-    const char * err_str = strerror (errnum);
-    return ((*env)->NewStringUTF(env, err_str));
+    }
 }
 
 JNIEXPORT jint JNICALL Java_SharedMemoryStreams_sendData (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jbyteArray buf, jint offset, jint len) { 
@@ -246,6 +242,13 @@ JNIEXPORT void JNICALL Java_SharedMemoryStreams_close (JNIEnv *env, jobject obj,
           setErrnum(env, obj, errno);
         }
     }
+}
+
+*/
+
+JNIEXPORT jstring JNICALL Java_LinuxNIPC_strerror (JNIEnv *env, jobject obj, jint errnum) {
+    const char * err_str = strerror (errnum);
+    return ((*env)->NewStringUTF(env, err_str));
 }
 
 void setErrnum (JNIEnv *env, jobject obj, int errnum) { 
