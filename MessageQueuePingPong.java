@@ -8,9 +8,11 @@ public class MessageQueuePingPong {
     private int ID;
     private Long Total;
     
-    public MessageQueuePingPong(String name, int key) throws IOException {
+    public MessageQueuePingPong(String name, String path) throws IOException {
         this.myName = name;
         this.Total = 0L;
+        int key = 999;
+        
         if (myName.equals("Ping")) {
             messageQueue = new MessageQueueChannel(key);
             ID = messageQueue.getMessageQueueID();
@@ -73,13 +75,8 @@ public class MessageQueuePingPong {
         int key;
         String myName = args[0];
         int rounds = Integer.parseInt(args[1]);
-        String PingPong = "/home/Timothy/PingPong";
-        if ((key = ipc.ftok(PingPong, 'a')) != -1) { 
-            System.out.println("ftok succeeded.  key = " + key);
-        } else { 
-            System.out.println("ftok failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
-        }
-        MessageQueuePingPong simulation = new MessageQueuePingPong(myName, key);
+        String path = "/home/Timothy/PingPong";
+        MessageQueuePingPong simulation = new MessageQueuePingPong(myName, path);
         simulation.playSimulation(rounds);
     }
 }

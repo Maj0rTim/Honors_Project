@@ -22,13 +22,13 @@ public class MessageQueueChannel
         return this.msgqid;
     }
 
-    public byte[] read() throws IOException {
+    public Long readLong() throws IOException {
         buffer.clear();
         if ((dataSize = ipc.msgrcv(msgqid, buffer, MAX_BUF_SIZE, QUEUE_TYPE, 0)) == -1) { 
             throw new IOException("MessageQueueInput: read failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
         }
         buffer.flip();
-        return buffer.array();
+        return buffer.getLong();
     }
 
     public void writeLong(long l) throws IOException { 
