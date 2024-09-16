@@ -5,9 +5,10 @@ public class SharedMemoryChannel {
     
     ByteBuffer buffer;
     private LinuxNIPC ipc = new LinuxNIPC();
+    public static final int DEF_BUF_SIZE = 4092;
 
     public SharedMemoryChannel() {
-
+        ipc.initStream(key, size, initSems ? 1 : 0);
     }
 
     public byte[] read() throws IOException {

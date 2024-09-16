@@ -2,21 +2,20 @@ import java.io.IOException;
 
 public class MessageQueuePingPong {
     
-    private static final String PINGTOPONG = "/home/Timothy/Ping";
-    private static final String PONGTOPING = "/home/Timothy/Pong";
+    private LinuxNIPC ipc = new LinuxNIPC();
     private MessageQueueChannel messageQueue;
     private String myName;
     private int ID;
     private Long Total;
     
-    public MessageQueuePingPong(String name) throws IOException {
+    public MessageQueuePingPong(String name, int key) throws IOException {
         this.myName = name;
         this.Total = 0L;
         if (myName.equals("Ping")) {
-            messageQueue = new MessageQueueChannel(PINGTOPONG);
+            messageQueue = new MessageQueueChannel(key);
             ID = messageQueue.getMessageQueueID();
         } else if (myName.equals("Pong")) {
-            messageQueue = new MessageQueueChannel(PONGTOPING);
+            messageQueue = new MessageQueueChannel(key);
             ID = messageQueue.getMessageQueueID();
         }
     }
@@ -71,11 +70,16 @@ public class MessageQueuePingPong {
             System.out.println("Usage: java NamedPipePingPong <Ping|Pong> <rounds>");
             return;
         }
-
+        int key;
         String myName = args[0];
         int rounds = Integer.parseInt(args[1]);
-        
-        MessageQueuePingPong simulation = new MessageQueuePingPong(myName);
+        String PingPong = "/home/Timothy/PingPong";
+        if ((key = ipc.ftok(PingPong, 'a')) != -1) { 
+            System.out.println("ftok succeeded.  key = " + key);
+        } else { 
+            System.out.println("ftok failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
+        }
+        MessageQueuePingPong simulation = new MessageQueuePingPong(myName, key);
         simulation.playSimulation(rounds);
     }
 }

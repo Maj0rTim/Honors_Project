@@ -72,7 +72,103 @@ public class LinuxNIPC
       * @returns A value that can be used as a key for the IPC methods, or -1 if
       *   unsuccessful (errnum is set to the cause of the error).
       */
+
+    /** Create a new IPC key value.  See the man page for <CODE>ftok()</CODE>
+      * for more details.
+      * @param pathname A file name used to form the key.
+      * @param proj A "project identifier" used to form the key.
+      * @returns A value that can be used as a key for the IPC methods, or -1 if
+      *   unsuccessful (errnum is set to the cause of the error).
+      */
+    public native int ftok (String pathname, char proj);
     
+    /** Create a new message queue.  See the man page for <CODE>msgget()</CODE>
+      * for more details.
+      * @param key An identifier to be used for this queue.
+      * @param msgflg The flags to be used for this queue (IPC_CREAT or
+      * IPC_EXCL).
+      */
+    public native int msgget (int key, int msgflg);
+
+    /** Send a message using a message queue.  See the man page for
+      * <CODE>msgsnd()</CODE> for more details.
+      * @param msgqid The message queue identifier (obtained from
+      * <CODE>msgget()</CODE>).
+      * @param type The message type.
+      * @param msg The message to be sent.
+      * @param msgsz The size of the message.  Only this number of bytes from
+      * msg will be sent.  If the size is negative, all of msg will be sent.
+      * @param msgflg The flags to be used for this queue (IPC_NOWAIT).
+      * @returns 
+      */
+    public native int msgsnd (int msqid, int type, byte[] msg, int msgsz, int msgflg);
+    
+    
+    /** Receive a message using a message queue.  See the man page for
+      * <CODE>msgrcv()</CODE> for more details.
+      * @param msgqid The message queue identifier (obtained from
+      * <CODE>msgget()</CODE>).
+      * @param msg The message received.
+      * @param msgsz The size of the message.  The received message is
+      * truncated to msgsz bytes if it is larger than msgsz and
+      * (msgflg & MSG_NOERROR) is non-zero. The truncated part of the message
+      * is lost, and no indication of the truncation is given to the calling
+      * process.
+      * @param type The message type. If type is 0, the first message on the
+      * queue is received. If type is greater than 0, the first message of
+      * type type is received. If type is less than 0, the first message
+      * of the lowest type that is less than or equal to the absolute value
+      * of type is received. 
+      * @param msgflg The flags to be used for this queue (IPC_NOWAIT, or
+      *   MSG_NOERROR).
+      * @returns If successful, the number of bytes actually placed into msg.
+      *   On failure, -1 (errnum has the Linux error code).
+      */
+    public native int msgrcv (int msgqid, byte[] msg, int msgsz, int type, int msgflg);
+
+    /** Remove an IPC message queue.  See the man page for
+      * <CODE>msgctl()</CODE> for more details.
+      * @param msgqid The message queue identifier (obtained from
+      * <CODE>msgget()</CODE>).
+      * @returns If successful, 0.
+      *   On failure, -1 (errnum has the Linux error code).
+      */
+    public native int msgRmid (int msgqid);
+
+    /** Initialises stream by creating semaphore set and shared memory segment.
+      * Initialises the shmid and semid fields of this class.
+      * @param key
+      * @param size
+      * @param initSems 
+    */
+    private native void initStream (int key, int size, int initSems);
+
+    /** Places the data into the shared memory segment, using the semaphores
+      * for signalling.
+      * Returns -1 if there is an error, 0 otherwise.
+      * @param shmaddr
+      * @param semid
+      * @param buffer
+      * @param offset
+      * @param len
+    */
+    private native int sendData (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
+
+    /** Fills buf from the the shared memory segment, using the semaphores
+      * for signalling.
+      * Returns The number of bytes placed in buf, or -1 if there is an error.
+      */
+    private native int fillBuffer (int shmaddr, int semid, ByteBuffer buffer);
+
+    /** Detach shared memory segment and optionally remove share memory
+      * and semaphore ids.
+      */
+    private native void close (int shmid, int shmaddr, int semid, int removeIds);
+
+
+
+
+
 
     /** Get error message corresponding to error code.  This simply calls the
       * C strerror function.
@@ -88,20 +184,20 @@ public class LinuxNIPC
       * last IPC call.
       * @returns The current value of the errnum variable.
       */
-    public int getErrnum ()
-      { return errnum;
-      } // getErrnum
+    public int getErrnum () { 
+      return errnum;
+    }
 
     /** Set the error number.  This method overwrites whatever value is
       * currently contained in the errnum variable.
       * @param errnum The new value for the errnum variable.
       */
-    public void setErrnum (int errnum)
-      { this.errnum = errnum;
-      } // setErrnum
+    public void setErrnum (int errnum) { 
+      this.errnum = errnum;
+    }
 
-    static
-      { System.loadLibrary("LinuxNIPC");
-      } // static block
+    static { 
+      System.loadLibrary("LinuxNIPC");
+    } 
 
   } // class LinuxIPC

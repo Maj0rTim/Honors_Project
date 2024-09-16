@@ -11,10 +11,8 @@ public class MessageQueueChannel
     private ByteBuffer buffer;
     private LinuxNIPC ipc = new LinuxNIPC();
     
-    public MessageQueueChannel(String path) { 
-        if ((key = ipc.ftok(path, 'a')) != -1) { 
-            System.out.println("ftok succeeded.  key = " + key);
-        } else { System.out.println("ftok failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
+    public MessageQueueChannel(int key) { 
+        
         if ((msgqid = ipc.msgget(key, LinuxNIPC.IPC_CREAT | 0660)) == -1)
         System.err.println("MessageQueueOutput: msgget failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
@@ -24,21 +22,20 @@ public class MessageQueueChannel
         return this.msgqid;
     }
 
-    public Long readLong() throws IOException {
+    public byte[] read() throws IOException {
         buffer.clear();
-        if ((dataSize = ipc.msgrcv(msgqid, QUEUE_TYPE, buffer, MAX_BUF_SIZE, 0)) == -1) { 
+        if ((dataSize = ipc.msgrcv(msgqid, buffer, MAX_BUF_SIZE, QUEUE_TYPE, 0)) == -1) { 
             throw new IOException("MessageQueueInput: read failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
         }
         buffer.flip();
-        Long data = buffer.getLong();
-        return data;
+        return buffer.array();
     }
 
     public void writeLong(long l) throws IOException { 
         buffer.clear();
         buffer.putLong(l);
         if (buffer.hasArray()) {
-            if (ipc.msgsnd(msgqid, QUEUE_TYPE, buffer, buffer.capacity(), 0) == -1) {
+            if (ipc.msgsnd(msgqid, buffer, buffer.capacity(), QUEUE_TYPE, 0) == -1) {
                 throw new IOException("MessageQueueOutput: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
             }
         } else { 
