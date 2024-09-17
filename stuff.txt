@@ -1,0 +1,5 @@
+Exception in thread "main" java.lang.UnsatisfiedLinkError: 'int LinuxNIPC.msgget(int, int)'
+	at LinuxNIPC.msgget(Native Method)
+	at MessageQueueChannel.<init>(MessageQueueChannel.java:16)
+	at MessageQueuePingPong.<init>(MessageQueuePingPong.java:20)
+	at MessageQueuePingPong.main(MessageQueuePingPong.java:79)
