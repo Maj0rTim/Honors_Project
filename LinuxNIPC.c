@@ -48,7 +48,6 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_ftok (JNIEnv * env, jobject obj, jstring pa
     } else { retval = -1;
         setErrnum(env, obj, ENOENT);
     }
-
     (*env)->ReleaseStringUTFChars(env, pathname, c_pathname);
     return retval;
 }
@@ -107,7 +106,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_msgrcv(JNIEnv *env, jobject obj, jint msgqi
 
     void *bufferAddress = (*env)->GetDirectBufferAddress(env, buffer);
     if (bufferAddress == NULL) {
-        setErrnum(env, obj, EFAULT); 
+        setErrnum(env, obj, EFAULT);
         return -1;
     }
 

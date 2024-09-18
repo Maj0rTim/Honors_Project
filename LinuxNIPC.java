@@ -64,14 +64,6 @@ public class LinuxNIPC
       *   error code).
       */
     public native int mkfifo (String name, int perms);
-    
-    /** Create a new IPC key value.  See the man page for <CODE>ftok()</CODE>
-      * for more details.
-      * @param pathname A file name used to form the key.
-      * @param proj A "project identifier" used to form the key.
-      * @returns A value that can be used as a key for the IPC methods, or -1 if
-      *   unsuccessful (errnum is set to the cause of the error).
-      */
 
     /** Create a new IPC key value.  See the man page for <CODE>ftok()</CODE>
       * for more details.
@@ -141,7 +133,7 @@ public class LinuxNIPC
       * @param size
       * @param initSems 
     */
-    private native void initStream (int key, int size, int initSems);
+    private native void initShrSem (int key, int size, Boolean initSems);
 
     /** Places the data into the shared memory segment, using the semaphores
       * for signalling.
@@ -152,13 +144,13 @@ public class LinuxNIPC
       * @param offset
       * @param len
     */
-    private native int sendData (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
+    private native int sendMsg (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
 
     /** Fills buf from the the shared memory segment, using the semaphores
       * for signalling.
       * Returns The number of bytes placed in buf, or -1 if there is an error.
       */
-    private native int fillBuffer (int shmaddr, int semid, ByteBuffer buffer);
+    private native int getMsg (int shmaddr, int semid, ByteBuffer buffer);
 
     /** Detach shared memory segment and optionally remove share memory
       * and semaphore ids.
