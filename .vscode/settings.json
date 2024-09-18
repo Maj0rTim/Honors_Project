@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "linuxnipc.h": "c"
+        "linuxnipc.h": "c",
+        "msg.h": "c"
     }
 }

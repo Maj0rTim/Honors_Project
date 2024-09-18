@@ -92,7 +92,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_msgsnd (JNIEnv * env, jobject obj, jint msg
 
     free(m);
     return retval;
-} 
+}
 
 JNIEXPORT jint JNICALL Java_LinuxIPC_msgrcv(JNIEnv *env, jobject obj, jint msgqid, jobject buffer, jint msgsz, jint msg_type, jint msgflgs) {
     int sz;
