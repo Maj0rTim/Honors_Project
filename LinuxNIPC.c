@@ -35,7 +35,7 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_mkfifo (JNIEnv *env, jobject obj, jstring 
     return retval;
 } 
 
-JNIEXPORT jint JNICALL Java_LinuxIPC_ftok (JNIEnv * env, jobject obj, jstring pathname, jchar proj) { 
+JNIEXPORT jint JNICALL Java_LinuxNIPC_ftok (JNIEnv * env, jobject obj, jstring pathname, jchar proj) { 
     jboolean iscopy;
     const char* c_pathname = (*env)->GetStringUTFChars(env, pathname, &iscopy);
     jint retval = 0;
@@ -52,7 +52,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_ftok (JNIEnv * env, jobject obj, jstring pa
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_LinuxIPC_msgget (JNIEnv * env, jobject obj, jint key, jint msgflg) { 
+JNIEXPORT jint JNICALL Java_LinuxNIPC_msgget (JNIEnv * env, jobject obj, jint key, jint msgflg) { 
     jint retval = msgget(key, msgflg);
     if (retval == -1) {
         setErrnum(env, obj, errno);
@@ -60,7 +60,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_msgget (JNIEnv * env, jobject obj, jint key
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_LinuxIPC_msgsnd (JNIEnv * env, jobject obj, jint msgqid, jobject buffer, jint msgsz, jint msg_type, jint msgflgs) { 
+JNIEXPORT jint JNICALL Java_LinuxNIPC_msgsnd (JNIEnv * env, jobject obj, jint msgqid, jobject buffer, jint msgsz, jint msg_type, jint msgflgs) { 
     int sz;
     jint retval;
   
@@ -94,7 +94,7 @@ JNIEXPORT jint JNICALL Java_LinuxIPC_msgsnd (JNIEnv * env, jobject obj, jint msg
     return retval;
 }
 
-JNIEXPORT jint JNICALL Java_LinuxIPC_msgrcv(JNIEnv *env, jobject obj, jint msgqid, jobject buffer, jint msgsz, jint msg_type, jint msgflgs) {
+JNIEXPORT jint JNICALL Java_LinuxNIPC_msgrcv(JNIEnv *env, jobject obj, jint msgqid, jobject buffer, jint msgsz, jint msg_type, jint msgflgs) {
     int sz;
     jint retval;
 
