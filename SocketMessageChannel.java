@@ -11,8 +11,8 @@ public class SocketMessageChannel {
     private SocketChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
 
-    public SocketMessageChannel(String host, int port) throws IOException {
-        channel = SocketChannel.open(new InetSocketAddress(host, port));
+    public SocketMessageChannel(String host, int port2) throws IOException {
+        channel = SocketChannel.open(new InetSocketAddress(host, port2));
         channel.configureBlocking(false);
     }
 
