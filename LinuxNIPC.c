@@ -128,6 +128,14 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgrcv(JNIEnv *env, jobject obj, jint msgq
     return retval;
 }
 
+JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid (JNIEnv *env, jobject obj, jint msgqid) {
+    if (msgctl(msgqid, IPC_RMID, 0) == -1) {
+        setErrnum(env, obj, errno);
+        return -1;
+    }
+    return 0;
+}
+
 /*
 JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;

@@ -49,12 +49,12 @@ public class NamedPipePingPong {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
-                pingThrowBall(start);
-                pingCatchBall();
+                pipe.writeLong(start);
+                pipe.readLong();
                 Long end = System.nanoTime();
                 Total += end - start;
             } else {
-                pongThrowBall(pongCatchBall());
+                pipe.writeLong(pipe.readLong());
             }
         }
         System.out.println(Total/rounds);
@@ -63,22 +63,6 @@ public class NamedPipePingPong {
     private void closeChannels() throws IOException {
         pipe.closeReadChannel();
         pipe.closeWriteChannel();
-    }
-
-    private void pingThrowBall(Long time) throws IOException {
-        pipe.writeLong(time);
-    }
-
-    private Long pingCatchBall() throws IOException {
-        return pipe.readLong();
-    }
-
-    private void pongThrowBall(Long time) throws IOException {
-        pipe.writeLong(time);
-    }
-
-    private Long pongCatchBall() throws IOException {
-        return pipe.readLong();
     }
     
     public static void main(String[] args) throws IOException, ClassNotFoundException {

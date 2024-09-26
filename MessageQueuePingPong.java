@@ -11,7 +11,7 @@ public class MessageQueuePingPong {
     public MessageQueuePingPong(String name, String path) throws IOException {
         this.myName = name;
         this.Total = 0L;
-        int key = 999;
+        int key = 99909;
         
         if (myName.equals("Ping")) {
             messageQueue = new MessageQueueChannel(key);
@@ -23,56 +23,43 @@ public class MessageQueuePingPong {
     }
 
     public void playSimulation(int rounds) throws IOException {
-        synchronize();
+        
         getRoundTripTime(rounds);
+        closeMessageQueue();
     }
 
-    private void synchronize() throws IOException {
-        if (myName.equals("Ping")) {
-            messageQueue.writeLong(0L);
-            messageQueue.readLong();
-        } else {
-            messageQueue.readLong();
-            messageQueue.writeLong(0L);
-        }
-    }
+    
 
     private void getRoundTripTime(int rounds) throws IOException {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
-                pingThrowBall(System.nanoTime());
-                Long start = pingCatchBall();
+                Long start = System.nanoTime();
+                messageQueue.writeLong(8L);
+                messageQueue.readLong();
                 Long end = System.nanoTime();
-                Total += end - start;
+                Long timing = end - start;
+                if (i != 0) {
+                    Total += timing;
+                }
             } else {
-                pongThrowBall(pongCatchBall());
+                messageQueue.writeLong(messageQueue.readLong());
             }
+
         }
-        System.out.println(Total/rounds);
+        if (myName.equals("Ping")) {
+            System.out.println(Total/(rounds-1));
+        }
     }
 
-    private void pingThrowBall(Long time) throws IOException {
-        messageQueue.writeLong(time);
+    private void closeMessageQueue() {
+        ipc.msgRmid(ID);
     }
 
-    private Long pingCatchBall() throws IOException {
-        return messageQueue.readLong();
-    }
-
-    private void pongThrowBall(Long time) throws IOException {
-        messageQueue.writeLong(time);
-    }
-
-    private Long pongCatchBall() throws IOException {
-        return messageQueue.readLong();
-    }
-    
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         if (args.length != 2) {
             System.out.println("Usage: java NamedPipePingPong <Ping|Pong> <rounds>");
             return;
         }
-        int key;
         String myName = args[0];
         int rounds = Integer.parseInt(args[1]);
         String path = "/home/Timothy/PingPong";

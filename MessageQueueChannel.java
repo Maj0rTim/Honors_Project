@@ -5,9 +5,7 @@ public class MessageQueueChannel
 {
     public static final int QUEUE_TYPE = 9999;
     public static final int MAX_BUF_SIZE = 4096;
-    private int key;
     private int msgqid;
-    private int dataSize;
     private ByteBuffer buffer;
     private LinuxNIPC ipc = new LinuxNIPC();
     
@@ -24,24 +22,19 @@ public class MessageQueueChannel
 
     public Long readLong() throws IOException {
         buffer.clear();
-        if ((dataSize = ipc.msgrcv(msgqid, buffer, MAX_BUF_SIZE, QUEUE_TYPE, 0)) == -1) { 
+        if ((ipc.msgrcv(msgqid, buffer, 8, QUEUE_TYPE, 0)) == -1) { 
             throw new IOException("MessageQueueInput: read failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); 
         }
-        buffer.flip();
         return buffer.getLong();
     }
 
     public void writeLong(long l) throws IOException { 
         buffer.clear();
         buffer.putLong(l);
-        if (buffer.hasArray()) {
-            if (ipc.msgsnd(msgqid, buffer, buffer.capacity(), QUEUE_TYPE, 0) == -1) {
-                throw new IOException("MessageQueueOutput: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
-            }
-        } else { 
-            throw new IOException("Buffer is empty"); 
+        buffer.flip();
+        if (ipc.msgsnd(msgqid, buffer, 8, QUEUE_TYPE, 0) == -1) {
+            throw new IOException("MessageQueueOutput: msgsnd failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
         }
-        
     } 
     
     public void closeMessageQueue() throws IOException {
