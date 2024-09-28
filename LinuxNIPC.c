@@ -136,7 +136,7 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid (JNIEnv *env, jobject obj, jint ms
     return 0;
 }
 
-/*
+
 JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;
     int semid;
@@ -190,47 +190,60 @@ JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject
     }
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryStreams_sendData (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jbyteArray buf, jint offset, jint len) { 
+JNIEXPORT jint JNICALL Java_SharedMemoryStreams_sendData (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint offset, jint len) {
     struct sembuf sb;
     sb.sem_num = WRITE_SEM;
     sb.sem_op = -1;
     sb.sem_flg = 0;
 
-    if (semop(semid, &sb, 1) == -1) { 
+    if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
-        return;
+        return -1;
     }
     int *p = (int *)shmaddr;
     *p = len;
     p++;
-    jbyte* bytes = (*env)->GetByteArrayElements(env, buf, 0);
-    memcpy(p, bytes+offset, len);
-    (*env)->ReleaseByteArrayElements(env, buf, bytes, 0);
+    void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
+
+    if (bufferAddress == NULL) {
+        setErrnum(env, obj, ENOMEM);  
+        return -1;
+    }
+    memcpy(p, (char*)bufferAddress + offset, len);
     sb.sem_num = READ_SEM;
     sb.sem_op = 1;
+
     if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
+        return -1;
     }
+    return 0; 
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryStreams_fillBuffer (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jbyteArray buf) { 
+JNIEXPORT jint JNICALL Java_SharedMemoryStreams_fillBuffer (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf) {
     struct sembuf sb;
     sb.sem_num = READ_SEM;
     sb.sem_op = -1;
     sb.sem_flg = 0;
 
-    if (semop(semid, &sb, 1) == -1) { 
+    if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
         return -1;
     }
     int *p = (int *)shmaddr;
     int len = *p;
-    p++;
-    (*env)->SetByteArrayRegion(env, buf, 0, len, (jbyte *)p);
+    p++; 
+    void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
+
+    if (bufferAddress == NULL) {
+        setErrnum(env, obj, ENOMEM);  
+        return -1;
+    }
+    memcpy(bufferAddress, p, len);
     sb.sem_num = WRITE_SEM;
     sb.sem_op = 1;
 
-    if (semop(semid, &sb, 1) == -1) { 
+    if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
         len = -1;
     }
@@ -250,8 +263,6 @@ JNIEXPORT void JNICALL Java_SharedMemoryStreams_close (JNIEnv *env, jobject obj,
         }
     }
 }
-
-*/
 
 JNIEXPORT jstring JNICALL Java_LinuxNIPC_strerror (JNIEnv *env, jobject obj, jint errnum) {
     const char * err_str = strerror (errnum);

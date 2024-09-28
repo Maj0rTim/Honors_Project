@@ -37,11 +37,11 @@ public class NamedPipePingPong {
 
     private void synchronize() throws IOException {
         if (myName.equals("Ping")) {
-            pipe.writeLong(0);
+            pipe.write(0);
             pipe.readLong();
         } else {
             pipe.readLong();
-            pipe.writeLong(0);
+            pipe.write(0);
         }
     }
 
@@ -49,7 +49,7 @@ public class NamedPipePingPong {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
-                pipe.writeLong(start);
+                pipe.write(start);
                 pipe.readLong();
                 Long end = System.nanoTime();
                 Total += end - start;

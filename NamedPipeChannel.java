@@ -44,22 +44,32 @@ public class NamedPipeChannel
         System.out.println("Write Channel Closed");
     }
 
-    public long readLong() throws IOException {
-        buffer.clear();
-        int bytesRead = readChannel.read(buffer);
-        if (bytesRead == -1) {
-            throw new IOException("End of stream reached");
+    public void write(byte[] data) throws IOException {
+        int totalBytesWritten = 0;
+        int totalBytes = data.length;
+        while (totalBytesWritten < totalBytes) {
+            buffer.clear();
+            int bytesToWrite = Math.min(MAX_BUF_SIZE, totalBytes - totalBytesWritten);
+            buffer.put(data, totalBytesWritten, bytesToWrite);
+            buffer.flip();
+            while (buffer.hasRemaining()) {
+                writeChannel.write(buffer);
+            }
         }
-        buffer.flip();
-        return buffer.getLong();
     }
 
-    public void writeLong(long data) throws IOException {
-        buffer.clear();
-        buffer.putLong(data);
-        buffer.flip();
-        while (buffer.hasRemaining()) {
-            writeChannel.write(buffer);
+    public byte[] read(int totalBytes) throws IOException {
+        int totalBytesRead = 0;
+        byte[] totalMessage = new byte[totalBytes];
+        while (totalBytesRead < totalBytes) {
+            buffer.clear();
+            int bytesRead = readChannel.read(buffer);
+            if (bytesRead == -1) { break; }
+            buffer.flip();
+            int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
+            buffer.get(totalMessage, totalBytesRead, bytesToRead);
+            totalBytesRead += bytesRead;
         }
+        return totalMessage;
     }
 }

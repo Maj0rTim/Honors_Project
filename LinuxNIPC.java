@@ -133,7 +133,7 @@ public class LinuxNIPC
       * @param size
       * @param initSems 
     */
-    private native void initShrSem (int key, int size, Boolean initSems);
+    private native void initShrSem (int key, int size, int initSems);
 
     /** Places the data into the shared memory segment, using the semaphores
       * for signalling.
@@ -156,11 +156,6 @@ public class LinuxNIPC
       * and semaphore ids.
       */
     private native void close (int shmid, int shmaddr, int semid, int removeIds);
-
-
-
-
-
 
     /** Get error message corresponding to error code.  This simply calls the
       * C strerror function.

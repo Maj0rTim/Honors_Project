@@ -27,11 +27,27 @@ public class SocketMessageChannel {
         System.out.println("Write Channel Created");
     }
 
+    public void closeReadChannel() throws IOException {
+        readChannel.close();
+        System.out.println("Read Channel Closed");
+    }
+
+    public void closeWriteChannel() throws IOException {
+        writeChannel.close();
+        System.out.println("Write Channel Closed");
+    }
+
     public void write(byte[] data) throws IOException {
-        buffer.clear();
-        buffer.put(data);
-        while (buffer.hasRemaining()) {
-            writeChannel.write(buffer);
+        int totalBytesWritten = 0;
+        int totalBytes = data.length;
+        while (totalBytesWritten < totalBytes) {
+            buffer.clear();
+            int bytesToWrite = Math.min(MAX_BUF_SIZE, totalBytes - totalBytesWritten);
+            buffer.put(data, totalBytesWritten, bytesToWrite);
+            buffer.flip();
+            while (buffer.hasRemaining()) {
+                writeChannel.write(buffer);
+            }
         }
     }
 
@@ -41,15 +57,12 @@ public class SocketMessageChannel {
         while (totalBytesRead < totalBytes) {
             buffer.clear();
             int bytesRead = readChannel.read(buffer);
+            if (bytesRead == -1) { break; }
             buffer.flip();
-            buffer.get(totalMessage, totalBytesRead, bytesRead);
+            int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
+            buffer.get(totalMessage, totalBytesRead, bytesToRead);
             totalBytesRead += bytesRead;
         }
         return totalMessage;
-    }
-
-    public void closeSocketChannels() throws IOException {
-        readChannel.close();
-        writeChannel.close();
     }
 }

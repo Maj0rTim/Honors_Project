@@ -32,10 +32,10 @@ public class SocketChannelPingPong {
 
     private void setChannels() throws IOException {
         if (myName.equals("Ping")) {
-            socket.setReadChannel(HOST, PINGPORT);
+            socket.setReadChannel(HOST, PONGPORT);
             socket.setWriteChannel(HOST, PINGPORT);
         } else {
-            socket.setReadChannel(HOST, PONGPORT);
+            socket.setReadChannel(HOST, PINGPORT);
             socket.setWriteChannel(HOST, PONGPORT);
         }
     }
@@ -68,7 +68,8 @@ public class SocketChannelPingPong {
     }
 
     private void closeChannels() throws IOException {
-        socket.closeSocketChannels();
+        socket.closeReadChannel();
+        socket.closeWriteChannel();
     }
 
     public static void main(String[] args) throws IOException {
