@@ -1,26 +1,24 @@
+
 import java.io.IOException;
 
-public class MessageQueuePingPong {
+public class SharedMemoryPingPong {
     
     private static final int MAX_BUF_SIZE = 4096;
-    private static final int SIZE = 4096*10;
+    private static final int SIZE = 4096*2;
     private LinuxNIPC ipc = new LinuxNIPC();
-    private MessageQueueChannel messageQueue;
+    private SharedMemoryChannel SharedSegment;
     private String myName;
-    private int ID;
     private Long Total;
     
-    public MessageQueuePingPong(String name, String path) throws IOException {
+    public SharedMemoryPingPong(String name, String path) throws IOException {
         this.myName = name;
         this.Total = 0L;
         int key = 99909;
         
         if (myName.equals("Ping")) {
-            messageQueue = new MessageQueueChannel(key);
-            ID = messageQueue.getMessageQueueID();
+            SharedSegment = new SharedMemoryChannel(key, false);
         } else if (myName.equals("Pong")) {
-            messageQueue = new MessageQueueChannel(key);
-            ID = messageQueue.getMessageQueueID();
+            SharedSegment = new SharedMemoryChannel(key, false);
         }
     }
 
@@ -33,11 +31,11 @@ public class MessageQueuePingPong {
     private void synchronize() throws IOException {
         byte[] data = new byte[MAX_BUF_SIZE];
         if (myName.equals("Ping")) {
-            messageQueue.write(data);
-            messageQueue.read(data.length);
+            SharedSegment.write(data);
+            SharedSegment.read(data.length);
         } else {
-            messageQueue.read(data.length);
-            messageQueue.write(data);
+            SharedSegment.read(data.length);
+            SharedSegment.write(data);
         }
     }
 
@@ -46,12 +44,12 @@ public class MessageQueuePingPong {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
-                messageQueue.write(data);
-                messageQueue.read(data.length);
+                SharedSegment.write(data);
+                SharedSegment.read(data.length);
                 Long end = System.nanoTime();
                 Total += end - start;
             } else {
-                messageQueue.write(messageQueue.read(data.length));
+                SharedSegment.write(SharedSegment.read(data.length));
             }
         }
         if (myName.equals("Ping")) {
@@ -60,7 +58,7 @@ public class MessageQueuePingPong {
     }
 
     private void closeMessageQueue() {
-        ipc.msgRmid(ID);
+        ipc.closeShm();
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {

@@ -19,7 +19,7 @@ public class SharedMemoryChannel {
     }
 
     private void createSharedMemorySegment(int key, int size, boolean initSems) throws IOException {
-        ipc.initShrSem(key, size, initSems ? 1 : 0);
+        shmid = ipc.initShrSem(key, size, initSems ? 1 : 0);
     }
 
     public void write(byte[] data) throws IOException {
@@ -33,6 +33,7 @@ public class SharedMemoryChannel {
             while (buffer.hasRemaining()) {
                 ipc.sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
             }
+            totalBytesWritten += bytesToWrite;
         }
     }
 
@@ -52,7 +53,7 @@ public class SharedMemoryChannel {
     }
 
     public void close(Boolean removeIds) {
-        ipc.close(shmid, shmaddr, semid, removeIds ? 1 : 0);
+        ipc.closeShm(shmid, shmaddr, semid, removeIds ? 1 : 0);
     }
 
 }

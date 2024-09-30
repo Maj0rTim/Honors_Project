@@ -5,7 +5,7 @@ public class NamedPipePingPong {
     private static final String PING2PONG = "/tmp/fifo_ping2pong";
     private static final String PONG2PING = "/tmp/fifo_pong2ping";
     private static final int MAX_BUF_SIZE = 4096;
-    private static final int SIZE = 1024;
+    private static final int SIZE = 4096*10;
     private NamedPipeChannel pipe;
     private String myName;
     private Long Total;
@@ -39,7 +39,6 @@ public class NamedPipePingPong {
 
     private void synchronize() throws IOException {
         byte[] data = new byte[MAX_BUF_SIZE/2];
-        System.out.println("step 1");
         if (myName.equals("Ping")) {
             pipe.write(data);
             pipe.read(data.length);
@@ -62,7 +61,9 @@ public class NamedPipePingPong {
                 pipe.write(pipe.read(data.length));
             }
         }
-        System.out.println(Total/rounds);
+        if (myName.equals("Ping")) {
+            System.out.println(Total/(rounds-1));
+        }
     }
 
     private void closeChannels() throws IOException {

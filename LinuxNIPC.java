@@ -133,7 +133,7 @@ public class LinuxNIPC
       * @param size
       * @param initSems 
     */
-    private native void initShrSem (int key, int size, int initSems);
+    public native int initShrSem (int key, int size, int initSems);
 
     /** Places the data into the shared memory segment, using the semaphores
       * for signalling.
@@ -144,18 +144,18 @@ public class LinuxNIPC
       * @param offset
       * @param len
     */
-    private native int sendMsg (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
+    public native int sendMsg (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
 
     /** Fills buf from the the shared memory segment, using the semaphores
       * for signalling.
       * Returns The number of bytes placed in buf, or -1 if there is an error.
       */
-    private native int getMsg (int shmaddr, int semid, ByteBuffer buffer);
+    public native int getMsg (int shmaddr, int semid, ByteBuffer buffer);
 
     /** Detach shared memory segment and optionally remove share memory
       * and semaphore ids.
       */
-    private native void closeShm (int shmid, int shmaddr, int semid, int removeIds);
+    public native void closeShm (int shmid, int shmaddr, int semid, int removeIds);
 
     /** Get error message corresponding to error code.  This simply calls the
       * C strerror function.

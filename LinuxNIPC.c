@@ -142,7 +142,7 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid (JNIEnv *env, jobject obj, jint ms
 }
 
 
-JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
+JNIEXPORT jint JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;
     int semid;
     int shmaddr;
@@ -150,26 +150,26 @@ JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint
 
     if (shmid == -1) { 
         setErrnum(env, obj, errno);
-        return;
+        return -1;
     }
     shmaddr = shmat(shmid, 0, 0);
 
     if (shmaddr == -1) { 
         setErrnum(env, obj, errno);
-        return;
+        return -1;
     }
     semid = semget(key, 2, IPC_CREAT | 0600);
 
     if (semid == -1) { 
         setErrnum(env, obj, errno);
-        return;
+        return -1;
     }
 
     jclass cls = (*env)->GetObjectClass(env, obj);
     jmethodID mid = (*env)->GetMethodID(env, cls, "initFields", "(III)V");
     if (mid == 0) { 
         printf("Can't find method initFields\n");
-        return;
+        return -1;
     }
     (*env)->ExceptionClear(env);
     (*env)->CallVoidMethod(env, obj, mid, shmid, shmaddr, semid);
@@ -185,7 +185,7 @@ JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint
         
         if (semctl(semid, WRITE_SEM, SETVAL, 1) == -1) { 
             setErrnum(env, obj, errno);
-            return;
+            return -1;
         }
         
 
@@ -193,6 +193,7 @@ JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint
             setErrnum(env, obj, errno);
         }
     }
+    return shmid;
 }
 
 JNIEXPORT jint JNICALL Java_LinuxNIPC_sendMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint offset, jint len) {
