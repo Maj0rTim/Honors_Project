@@ -1,0 +1,39 @@
+LD_LIBRARY_PATH=~/JavaProgs/JNI
+export LD_LIBRARY_PATH
+
+# Socket
+java PingPongSocket Pong 20 & java PingPongSocket Ping 20
+# read
+# FIFO
+java PingPongFIFO Pong 20 & java PingPongFIFO Ping 20
+# read
+# Message queue
+java PingPong Pong 20 & java PingPong Ping 20
+# read
+# Old shared memory
+java PingPongShm1 Pong 20 & java PingPongShm1 Ping 20
+# read
+# Shared memory
+java PingPongShm Pong 20 & java PingPongShm Ping 20
+# read
+
+# Now do variable data size runs
+for ds in 40 400 4000 40000
+do
+  echo "'*************' Data size is $ds"
+  # Socket
+  java BPingPongSocket Pong 20 $ds & java BPingPongSocket Ping 20 $ds
+  #read
+  # FIFO
+  java BPingPongFIFO Pong 20 $ds & java BPingPongFIFO Ping 20 $ds
+  #read
+  # Message queue
+  java BPingPong Pong 20 $ds & java BPingPong Ping 20 $ds
+  #read
+  # Old shared memory
+  java BPingPongShm1 Pong 20 $ds & java BPingPongShm1 Ping 20 $ds
+  #read
+  # Shared memory
+  java BPingPongShm Pong 20 $ds & java BPingPongShm Ping 20 $ds
+  #read
+done
