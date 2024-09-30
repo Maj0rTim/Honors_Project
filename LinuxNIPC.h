@@ -80,10 +80,10 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid
 /*
  * Class:     LinuxNIPC
  * Method:    initShrSem
- * Signature: (IILjava/lang/Boolean;)V
+ * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem
-  (JNIEnv *, jobject, jint, jint, jobject);
+  (JNIEnv *, jobject, jint, jint, jint);
 
 /*
  * Class:     LinuxNIPC
@@ -103,10 +103,10 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_getMsg
 
 /*
  * Class:     LinuxNIPC
- * Method:    close
+ * Method:    closeShm
  * Signature: (IIII)V
  */
-JNIEXPORT void JNICALL Java_LinuxNIPC_close
+JNIEXPORT void JNICALL Java_LinuxNIPC_closeShm
   (JNIEnv *, jobject, jint, jint, jint, jint);
 
 /*

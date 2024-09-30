@@ -155,7 +155,7 @@ public class LinuxNIPC
     /** Detach shared memory segment and optionally remove share memory
       * and semaphore ids.
       */
-    private native void close (int shmid, int shmaddr, int semid, int removeIds);
+    private native void closeShm (int shmid, int shmaddr, int semid, int removeIds);
 
     /** Get error message corresponding to error code.  This simply calls the
       * C strerror function.

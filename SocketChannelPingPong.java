@@ -44,9 +44,9 @@ public class SocketChannelPingPong {
         byte[] data = new byte[8];
         if (myName.equals("Ping")) {
             socket.write(data);
-            socket.read(8);
+            socket.read(data.length);
         } else {
-            socket.read(8);
+            socket.read(data.length);
             socket.write(data);
         }
     }

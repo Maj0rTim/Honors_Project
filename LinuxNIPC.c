@@ -8,10 +8,15 @@
 #include <linux/stat.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
 
 #include "LinuxNIPC.h"
 
 void setErrnum (JNIEnv *, jobject, int);
+
+#define WRITE_SEM 0
+#define READ_SEM 1
 
 typedef struct message_buffer { 
     long mtype;
@@ -137,7 +142,7 @@ JNIEXPORT jint JNICALL Java_LinuxNIPC_msgRmid (JNIEnv *env, jobject obj, jint ms
 }
 
 
-JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
+JNIEXPORT void JNICALL Java_LinuxNIPC_initShrSem (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;
     int semid;
     int shmaddr;
@@ -176,21 +181,21 @@ JNIEXPORT void JNICALL Java_SharedMemoryStreams_initStream (JNIEnv *env, jobject
     }
 
     if (initSems) { 
-        union semun semopts;
-        semopts.val = 1;
-        if (semctl(semid, WRITE_SEM, SETVAL, semopts) == -1) { 
+        
+        
+        if (semctl(semid, WRITE_SEM, SETVAL, 1) == -1) { 
             setErrnum(env, obj, errno);
             return;
         }
-        semopts.val = 0;
+        
 
-        if (semctl(semid, READ_SEM, SETVAL, semopts) == -1) {
+        if (semctl(semid, READ_SEM, SETVAL, 0) == -1) {
             setErrnum(env, obj, errno);
         }
     }
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryStreams_sendData (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint offset, jint len) {
+JNIEXPORT jint JNICALL Java_LinuxNIPC_sendMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint offset, jint len) {
     struct sembuf sb;
     sb.sem_num = WRITE_SEM;
     sb.sem_op = -1;
@@ -220,7 +225,7 @@ JNIEXPORT jint JNICALL Java_SharedMemoryStreams_sendData (JNIEnv *env, jobject o
     return 0; 
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryStreams_fillBuffer (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf) {
+JNIEXPORT jint JNICALL Java_LinuxNIPC_getMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf) {
     struct sembuf sb;
     sb.sem_num = READ_SEM;
     sb.sem_op = -1;
@@ -250,7 +255,7 @@ JNIEXPORT jint JNICALL Java_SharedMemoryStreams_fillBuffer (JNIEnv *env, jobject
     return len;
 }
 
-JNIEXPORT void JNICALL Java_SharedMemoryStreams_close (JNIEnv *env, jobject obj, jint shmid, jint shmaddr, jint semid, jint removeIds) { 
+JNIEXPORT void JNICALL Java_LinuxNIPC_closeShm (JNIEnv *env, jobject obj, jint shmid, jint shmaddr, jint semid, jint removeIds) { 
     if (shmdt(shmaddr) == -1) {
         setErrnum(env, obj, errno);
     }

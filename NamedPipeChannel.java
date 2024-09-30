@@ -19,29 +19,24 @@ public class NamedPipeChannel
         if (ipc.mkfifo(path, PERMISSIONS) == 0) { System.out.println("mkfifo succeeded"); }
         else { System.out.println("mkfifo failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum())); }
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
-        System.out.println("Direct Buffer Allocated");
     }
 
     public void setReadChannel(String path) throws IOException {
         Path filePath = Paths.get(path);
         readChannel = FileChannel.open(filePath, StandardOpenOption.READ);
-        System.out.println("Read Channel Created");
     }
     
     public void setWriteChannel(String path) throws IOException {
         Path filePath = Paths.get(path);
         writeChannel = FileChannel.open(filePath, StandardOpenOption.WRITE);
-        System.out.println("Write Channel Created");
     }
 
     public void closeReadChannel() throws IOException {
         readChannel.close();
-        System.out.println("Read Channel Closed");
     }
 
     public void closeWriteChannel() throws IOException {
         writeChannel.close();
-        System.out.println("Write Channel Closed");
     }
 
     public void write(byte[] data) throws IOException {
@@ -55,6 +50,7 @@ public class NamedPipeChannel
             while (buffer.hasRemaining()) {
                 writeChannel.write(buffer);
             }
+            totalBytesWritten += bytesToWrite;
         }
     }
 
