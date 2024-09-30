@@ -1,40 +1,51 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 public class SocketMessageChannel {
     
     private static final int MAX_BUF_SIZE = 4096;
+    private ByteBuffer buffer;
     private SocketChannel readChannel;
     private SocketChannel writeChannel;
-    private ByteBuffer buffer;
+    private boolean isServer;
 
-    public SocketMessageChannel(String host, int port) throws IOException {
-        buffer = ByteBuffer.allocate(MAX_BUF_SIZE);
-        System.out.println("Buffer Allocated");
+    public SocketMessageChannel(boolean isServer) throws IOException {
+        this.buffer = ByteBuffer.allocate(MAX_BUF_SIZE);
+        this.isServer = isServer;
     }
 
-    public void setReadChannel(String host, int port) throws IOException {
-        readChannel = SocketChannel.open(new InetSocketAddress(host, port));
-        readChannel.configureBlocking(true);
-        System.out.println("Read Channel Created");
-    }
-    
-    public void setWriteChannel(String host, int port) throws IOException {
-        writeChannel = SocketChannel.open(new InetSocketAddress(host, port));
-        writeChannel.configureBlocking(true);
-        System.out.println("Write Channel Created");
+    public void setReadChannels(String host, int port) throws IOException {
+        if (isServer) {
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.bind(new InetSocketAddress(host, port));
+            serverSocketChannel.configureBlocking(true);
+            readChannel = serverSocketChannel.accept();
+            readChannel.configureBlocking(true);
+        } else {
+            readChannel = SocketChannel.open(new InetSocketAddress(host, port));
+            readChannel.configureBlocking(true);
+        }
     }
 
-    public void closeReadChannel() throws IOException {
+    public void setWriteChannels(String host, int port) throws IOException {
+        if (isServer) {
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.bind(new InetSocketAddress(host, port));
+            serverSocketChannel.configureBlocking(true);
+            writeChannel = serverSocketChannel.accept();
+            writeChannel.configureBlocking(true);
+        } else {
+            writeChannel = SocketChannel.open(new InetSocketAddress(host, port));
+            writeChannel.configureBlocking(true);
+        }
+    }
+
+    public void closeChannels() throws IOException{
         readChannel.close();
-        System.out.println("Read Channel Closed");
-    }
-
-    public void closeWriteChannel() throws IOException {
         writeChannel.close();
-        System.out.println("Write Channel Closed");
     }
 
     public void write(byte[] data) throws IOException {
@@ -48,6 +59,7 @@ public class SocketMessageChannel {
             while (buffer.hasRemaining()) {
                 writeChannel.write(buffer);
             }
+            totalBytesWritten += bytesToWrite;
         }
     }
 
@@ -57,7 +69,6 @@ public class SocketMessageChannel {
         while (totalBytesRead < totalBytes) {
             buffer.clear();
             int bytesRead = readChannel.read(buffer);
-            if (bytesRead == -1) { break; }
             buffer.flip();
             int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
             buffer.get(totalMessage, totalBytesRead, bytesToRead);

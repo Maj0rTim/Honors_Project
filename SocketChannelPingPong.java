@@ -7,9 +7,10 @@ public class SocketChannelPingPong {
     private String HOST;
     private static final int PINGPORT = 8851;
     private static final int PONGPORT = 8852;
-    private static final int SIZE = 40;
+    private static final int SIZE = 4096;
     private String myName;
     private SocketMessageChannel socket;
+    
     private Long Total;
 
     public SocketChannelPingPong(String name) throws IOException, UnknownHostException {
@@ -17,9 +18,9 @@ public class SocketChannelPingPong {
         this.myName = name;
         this.Total = 0L;
         if (myName.equals("Ping")) {
-            socket = new SocketMessageChannel(HOST, PINGPORT);
+            socket = new SocketMessageChannel(true);
         } else if (myName.equals("Pong")) {
-            socket = new SocketMessageChannel(HOST, PONGPORT);
+            socket = new SocketMessageChannel(false);
         }
     }
 
@@ -32,22 +33,21 @@ public class SocketChannelPingPong {
 
     private void setChannels() throws IOException {
         if (myName.equals("Ping")) {
-            socket.setReadChannel(HOST, PONGPORT);
-            socket.setWriteChannel(HOST, PINGPORT);
+            socket.setWriteChannels(HOST, PINGPORT);
+            socket.setReadChannels(HOST, PONGPORT);
         } else {
-            socket.setReadChannel(HOST, PINGPORT);
-            socket.setWriteChannel(HOST, PONGPORT);
+            socket.setReadChannels(HOST, PINGPORT);
+            socket.setWriteChannels(HOST, PONGPORT);
         }
     }
 
     private void synchronize() throws IOException {
-        byte[] data = new byte[8];
+        byte[] data = new byte[1024];
         if (myName.equals("Ping")) {
             socket.write(data);
             socket.read(data.length);
         } else {
-            socket.read(data.length);
-            socket.write(data);
+            socket.write(socket.read(data.length));
         }
     }
 
@@ -57,19 +57,18 @@ public class SocketChannelPingPong {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
                 socket.write(data);
-                socket.read(SIZE);
+                socket.read(data.length);
                 Long end = System.nanoTime();
                 Total += end - start;
             } else {
-                socket.write(socket.read(SIZE));
+                socket.write(socket.read(data.length));
             }
         }
         System.out.println(Total/rounds);
     }
 
     private void closeChannels() throws IOException {
-        socket.closeReadChannel();
-        socket.closeWriteChannel();
+        socket.closeChannels();
     }
 
     public static void main(String[] args) throws IOException {
