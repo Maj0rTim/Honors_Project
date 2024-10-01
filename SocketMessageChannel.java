@@ -13,7 +13,7 @@ public class SocketMessageChannel {
     private boolean isServer;
 
     public SocketMessageChannel(boolean isServer) throws IOException {
-        this.buffer = ByteBuffer.allocate(MAX_BUF_SIZE);
+        this.buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
         this.isServer = isServer;
     }
 

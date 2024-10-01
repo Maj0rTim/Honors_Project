@@ -4,38 +4,43 @@ import java.io.IOException;
 public class SharedMemoryPingPong {
     
     private static final int MAX_BUF_SIZE = 4096;
-    private static final int SIZE = 4096*2;
+    private static final int MAX_SHM_SIZE = 1024*40;
+    private static final int SIZE = 1024*2;
     private LinuxNIPC ipc = new LinuxNIPC();
-    private SharedMemoryChannel SharedSegment;
+    private SharedMemoryChannel writeSegment;
+    private SharedMemoryChannel readSegment;
     private String myName;
     private Long Total;
     
-    public SharedMemoryPingPong(String name, String path) throws IOException {
+    public SharedMemoryPingPong(String name) throws IOException {
         this.myName = name;
         this.Total = 0L;
-        int key = 99909;
-        
+        int pingKey = ((int)"Ping".hashCode() ^ 42);
+        int pongKey = ((int)"Pong".hashCode() ^ 42);
+
         if (myName.equals("Ping")) {
-            SharedSegment = new SharedMemoryChannel(key, false);
-        } else if (myName.equals("Pong")) {
-            SharedSegment = new SharedMemoryChannel(key, false);
+            writeSegment = new SharedMemoryChannel(pingKey, MAX_SHM_SIZE, false);
+            readSegment = new SharedMemoryChannel(pongKey, MAX_SHM_SIZE, false);
+        } else {
+            writeSegment = new SharedMemoryChannel(pongKey, MAX_SHM_SIZE, false);
+            readSegment = new SharedMemoryChannel(pingKey, MAX_SHM_SIZE, false);
         }
     }
 
     public void playSimulation(int rounds) throws IOException {
         synchronize();
         getRoundTripTime(rounds);
-        closeMessageQueue();
+        closeSharedMemory();
     }
 
     private void synchronize() throws IOException {
         byte[] data = new byte[MAX_BUF_SIZE];
         if (myName.equals("Ping")) {
-            SharedSegment.write(data);
-            SharedSegment.read(data.length);
+            writeSegment.write(data);
+            readSegment.read(data.length);
         } else {
-            SharedSegment.read(data.length);
-            SharedSegment.write(data);
+            readSegment.read(data.length);
+            writeSegment.write(data);
         }
     }
 
@@ -44,12 +49,12 @@ public class SharedMemoryPingPong {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
-                SharedSegment.write(data);
-                SharedSegment.read(data.length);
+                writeSegment.write(data);
+                readSegment.read(data.length);
                 Long end = System.nanoTime();
                 Total += end - start;
             } else {
-                SharedSegment.write(SharedSegment.read(data.length));
+                writeSegment.write(readSegment.read(data.length));
             }
         }
         if (myName.equals("Ping")) {
@@ -57,8 +62,9 @@ public class SharedMemoryPingPong {
         }
     }
 
-    private void closeMessageQueue() {
-        ipc.closeShm();
+    private void closeSharedMemory() {
+        writeSegment.close(true);
+        readSegment.close(true);
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -68,8 +74,7 @@ public class SharedMemoryPingPong {
         }
         String myName = args[0];
         int rounds = Integer.parseInt(args[1]);
-        String path = "/home/Timothy/PingPong";
-        MessageQueuePingPong simulation = new MessageQueuePingPong(myName, path);
+        SharedMemoryPingPong simulation = new SharedMemoryPingPong(myName);
         simulation.playSimulation(rounds);
     }
 }

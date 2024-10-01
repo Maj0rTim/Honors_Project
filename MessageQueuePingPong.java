@@ -3,7 +3,9 @@ import java.io.IOException;
 public class MessageQueuePingPong {
     
     private static final int MAX_BUF_SIZE = 4096;
-    private static final int SIZE = 4096*10;
+    private static final int SIZE = 1024*40;
+    private static final int PING_TYPE = 9999;
+    private static final int PONG_TYPE = 6666;
     private LinuxNIPC ipc = new LinuxNIPC();
     private MessageQueueChannel messageQueue;
     private String myName;
@@ -31,13 +33,12 @@ public class MessageQueuePingPong {
     }
 
     private void synchronize() throws IOException {
-        byte[] data = new byte[MAX_BUF_SIZE];
+        byte[] data = new byte[8];
         if (myName.equals("Ping")) {
-            messageQueue.write(data);
-            messageQueue.read(data.length);
+            messageQueue.write(data, PING_TYPE);
+            messageQueue.read(data.length, PONG_TYPE);
         } else {
-            messageQueue.read(data.length);
-            messageQueue.write(data);
+            messageQueue.write(messageQueue.read(data.length, PING_TYPE), PONG_TYPE);
         }
     }
 
@@ -46,12 +47,12 @@ public class MessageQueuePingPong {
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
-                messageQueue.write(data);
-                messageQueue.read(data.length);
+                messageQueue.write(data, PING_TYPE);
+                messageQueue.read(data.length, PONG_TYPE);
                 Long end = System.nanoTime();
                 Total += end - start;
             } else {
-                messageQueue.write(messageQueue.read(data.length));
+                messageQueue.write(messageQueue.read(data.length, PING_TYPE), PONG_TYPE);
             }
         }
         if (myName.equals("Ping")) {

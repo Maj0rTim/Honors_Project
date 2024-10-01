@@ -9,7 +9,7 @@ public class SharedMemoryChannel {
     private int shmid;
     private int shmaddr;
     private int semid;
-
+    
     public SharedMemoryChannel(int key, int size, boolean initSems) throws IOException {
         createSharedMemorySegment(key, size, initSems);
     }
@@ -19,7 +19,14 @@ public class SharedMemoryChannel {
     }
 
     private void createSharedMemorySegment(int key, int size, boolean initSems) throws IOException {
-        shmid = ipc.initShrSem(key, size, initSems ? 1 : 0);
+        ipc.initShrSem(key, size, initSems ? 1 : 0);
+    }
+
+    public void initFields (int shmid, int shmaddr, int semid) {
+        this.shmid = shmid;
+        this.shmaddr = shmaddr;
+        this.semid = semid;
+        System.out.println("Shared memory segment setup complete");
     }
 
     public void write(byte[] data) throws IOException {
@@ -29,10 +36,7 @@ public class SharedMemoryChannel {
             buffer.clear();
             int bytesToWrite = Math.min(MAX_BUF_SIZE, totalBytes - totalBytesWritten);
             buffer.put(data, totalBytesWritten, bytesToWrite);
-            buffer.flip();
-            while (buffer.hasRemaining()) {
-                ipc.sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
-            }
+            ipc.sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
             totalBytesWritten += bytesToWrite;
         }
     }
@@ -43,7 +47,6 @@ public class SharedMemoryChannel {
         while (totalBytesRead < totalBytes) {
             buffer.clear();
             int bytesRead = ipc.getMsg(shmaddr, semid, buffer);
-            if (bytesRead == -1) { break; }
             buffer.flip();
             int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
             buffer.get(totalMessage, totalBytesRead, bytesToRead);

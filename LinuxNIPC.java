@@ -133,7 +133,7 @@ public class LinuxNIPC
       * @param size
       * @param initSems 
     */
-    public native int initShrSem (int key, int size, int initSems);
+    public native void initShrSem (int key, int size, int initSems);
 
     /** Places the data into the shared memory segment, using the semaphores
       * for signalling.
