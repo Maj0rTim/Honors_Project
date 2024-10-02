@@ -72,7 +72,7 @@ public class SocketMessageChannel {
             buffer.flip();
             int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
             buffer.get(totalMessage, totalBytesRead, bytesToRead);
-            totalBytesRead += bytesRead;
+            totalBytesRead += bytesToRead;
         }
         return totalMessage;
     }

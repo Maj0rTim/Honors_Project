@@ -1,13 +1,13 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 public class SocketChannelPingPong {
 
     private String HOST;
     private static final int PINGPORT = 8851;
     private static final int PONGPORT = 8852;
-    private static final int SIZE = 4096;
     private String myName;
     private SocketMessageChannel socket;
     
@@ -25,10 +25,17 @@ public class SocketChannelPingPong {
     }
 
     public void playSimulation(int rounds) throws IOException {
+        int[] results = new int[40];
         setChannels();
         synchronize();
-        getRoundTripTime(rounds);
+        for (int i=0; i<results.length; i++) {
+            int size = 1024*i;
+            int result = getRoundTripTime(rounds, size);
+            results[i] = result;
+            Total = 0L;
+        }
         closeChannels();
+        System.out.println(Arrays.toString(results));
     }
 
     private void setChannels() throws IOException {
@@ -51,8 +58,8 @@ public class SocketChannelPingPong {
         }
     }
 
-    private void getRoundTripTime(int rounds) throws IOException {
-        byte[] data = new byte[SIZE];
+    private int getRoundTripTime(int rounds, int size) throws IOException {
+        byte[] data = new byte[size];
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
@@ -64,7 +71,7 @@ public class SocketChannelPingPong {
                 socket.write(socket.read(data.length));
             }
         }
-        System.out.println(Total/rounds);
+        return (int)(Total/rounds);
     }
 
     private void closeChannels() throws IOException {
