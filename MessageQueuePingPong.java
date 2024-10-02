@@ -1,11 +1,10 @@
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MessageQueuePingPong {
     
-    private static final int MAX_BUF_SIZE = 4096;
-    private static final int SIZE = 1024*40;
-    private static final int PING_TYPE = 9999;
-    private static final int PONG_TYPE = 6666;
+    private static final int PING_TYPE = 999;
+    private static final int PONG_TYPE = 666;
     private LinuxNIPC ipc = new LinuxNIPC();
     private MessageQueueChannel messageQueue;
     private String myName;
@@ -27,9 +26,16 @@ public class MessageQueuePingPong {
     }
 
     public void playSimulation(int rounds) throws IOException {
+        int[] results = new int[40];
         synchronize();
-        getRoundTripTime(rounds);
+        for (int i=0; i<results.length; i++) {
+            int size = 1024*i;
+            int result = getRoundTripTime(rounds, size);
+            results[i] = result;
+            Total = 0L;
+        }
         closeMessageQueue();
+        System.out.println(Arrays.toString(results));
     }
 
     private void synchronize() throws IOException {
@@ -42,8 +48,8 @@ public class MessageQueuePingPong {
         }
     }
 
-    private void getRoundTripTime(int rounds) throws IOException {
-        byte[] data = new byte[SIZE];
+    private int getRoundTripTime(int rounds, int size) throws IOException {
+        byte[] data = new byte[size];
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
@@ -55,9 +61,8 @@ public class MessageQueuePingPong {
                 messageQueue.write(messageQueue.read(data.length, PING_TYPE), PONG_TYPE);
             }
         }
-        if (myName.equals("Ping")) {
-            System.out.println(Total/(rounds-1));
-        }
+        return (int) (Total/(rounds-1));
+        
     }
 
     private void closeMessageQueue() {
