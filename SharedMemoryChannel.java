@@ -1,14 +1,15 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+
 public class SharedMemoryChannel {
     
-    private LinuxNIPC ipc = new LinuxNIPC();
     public static final int MAX_BUF_SIZE = 4092;
     ByteBuffer buffer;
     private int shmid;
     private int shmaddr;
     private int semid;
+    private int errnum;
     
     public SharedMemoryChannel(int key, int size, boolean initSems) throws IOException {
         createSharedMemorySegment(key, size, initSems);
@@ -19,7 +20,8 @@ public class SharedMemoryChannel {
     }
 
     private void createSharedMemorySegment(int key, int size, boolean initSems) throws IOException {
-        ipc.initShrSem(key, size, initSems ? 1 : 0);
+        initShrSem(key, size, initSems ? 1 : 0);
+        buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     }
 
     public void initFields (int shmid, int shmaddr, int semid) {
@@ -34,9 +36,12 @@ public class SharedMemoryChannel {
         int totalBytes = data.length;
         while (totalBytesWritten < totalBytes) {
             buffer.clear();
+            System.out.println("1");
             int bytesToWrite = Math.min(MAX_BUF_SIZE, totalBytes - totalBytesWritten);
             buffer.put(data, totalBytesWritten, bytesToWrite);
-            ipc.sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
+            System.out.println("2");
+            sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
+            System.out.println("3");
             totalBytesWritten += bytesToWrite;
         }
     }
@@ -46,17 +51,42 @@ public class SharedMemoryChannel {
         byte[] totalMessage = new byte[totalBytes];
         while (totalBytesRead < totalBytes) {
             buffer.clear();
-            int bytesRead = ipc.getMsg(shmaddr, semid, buffer);
+            System.out.println("1");
+            int bytesRead = getMsg(shmaddr, semid, buffer);
+            System.out.println("2");
             buffer.flip();
             int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
             buffer.get(totalMessage, totalBytesRead, bytesToRead);
+            System.out.println("3");
             totalBytesRead += bytesRead;
         }
         return totalMessage;
     }
 
     public void close(Boolean removeIds) {
-        ipc.closeShm(shmid, shmaddr, semid, removeIds ? 1 : 0);
+        closeShm(shmid, shmaddr, semid, removeIds ? 1 : 0);
     }
+
+    public native void initShrSem (int key, int size, int initSems);
+
+    public native int sendMsg (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
+
+    public native int getMsg (int shmaddr, int semid, ByteBuffer buffer);
+
+    public native void closeShm (int shmid, int shmaddr, int semid, int removeIds);
+
+    public native String strerror (int errnum);
+
+    public int getErrnum () { 
+      return errnum;
+    }
+
+    public void setErrnum (int errnum) { 
+      this.errnum = errnum;
+    }
+
+    static { 
+      System.loadLibrary("LinuxNIPC_shm");
+    } 
 
 }

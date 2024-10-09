@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "linuxnipc.h": "c",
-        "msg.h": "c"
+        "msg.h": "c",
+        "stat.h": "c"
     }
 }

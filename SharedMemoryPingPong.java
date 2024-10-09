@@ -6,7 +6,6 @@ public class SharedMemoryPingPong {
     private static final int MAX_BUF_SIZE = 4096;
     private static final int MAX_SHM_SIZE = 1024*40;
     private static final int SIZE = 1024*2;
-    private LinuxNIPC ipc = new LinuxNIPC();
     private SharedMemoryChannel writeSegment;
     private SharedMemoryChannel readSegment;
     private String myName;
@@ -39,8 +38,7 @@ public class SharedMemoryPingPong {
             writeSegment.write(data);
             readSegment.read(data.length);
         } else {
-            readSegment.read(data.length);
-            writeSegment.write(data);
+            writeSegment.write(readSegment.read(data.length));
         }
     }
 
