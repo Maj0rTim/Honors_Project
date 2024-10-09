@@ -1,11 +1,11 @@
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class SharedMemoryPingPong {
     
     private static final int MAX_BUF_SIZE = 4096;
     private static final int MAX_SHM_SIZE = 1024*40;
-    private static final int SIZE = 1024*2;
     private SharedMemoryChannel writeSegment;
     private SharedMemoryChannel readSegment;
     private String myName;
@@ -27,9 +27,16 @@ public class SharedMemoryPingPong {
     }
 
     public void playSimulation(int rounds) throws IOException {
+        int[] results = new int[40];
         synchronize();
-        getRoundTripTime(rounds);
+        for (int i=0; i<results.length; i++) {
+            int size = 1024*(i+1);
+            int result = getRoundTripTime(rounds, size);
+            results[i] = result;
+            Total = 0L;
+        }
         closeSharedMemory();
+        System.out.println(Arrays.toString(results));
     }
 
     private void synchronize() throws IOException {
@@ -42,8 +49,8 @@ public class SharedMemoryPingPong {
         }
     }
 
-    private void getRoundTripTime(int rounds) throws IOException {
-        byte[] data = new byte[SIZE];
+    private int getRoundTripTime(int rounds, int size) throws IOException {
+        byte[] data = new byte[size];
         for (int i=0; i<rounds; i++) {
             if (myName.equals("Ping")) {
                 Long start = System.nanoTime();
@@ -55,9 +62,8 @@ public class SharedMemoryPingPong {
                 writeSegment.write(readSegment.read(data.length));
             }
         }
-        if (myName.equals("Ping")) {
-            System.out.println(Total/(rounds-1));
-        }
+        return (int) (Total/(rounds));
+        
     }
 
     private void closeSharedMemory() {

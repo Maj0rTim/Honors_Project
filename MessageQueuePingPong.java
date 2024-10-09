@@ -3,8 +3,8 @@ import java.util.Arrays;
 
 public class MessageQueuePingPong {
     
-    private static final int PING_TYPE = 999;
-    private static final int PONG_TYPE = 666;
+    private static final int PING_TYPE = 99;
+    private static final int PONG_TYPE = 66;
     private LinuxNIPC ipc = new LinuxNIPC();
     private MessageQueueChannel messageQueue;
     private String myName;
@@ -29,7 +29,7 @@ public class MessageQueuePingPong {
         int[] results = new int[40];
         synchronize();
         for (int i=0; i<results.length; i++) {
-            int size = 1024*i;
+            int size = 1024*(i+1);
             int result = getRoundTripTime(rounds, size);
             results[i] = result;
             Total = 0L;
@@ -61,7 +61,7 @@ public class MessageQueuePingPong {
                 messageQueue.write(messageQueue.read(data.length, PING_TYPE), PONG_TYPE);
             }
         }
-        return (int) (Total/(rounds-1));
+        return (int) (Total/(rounds));
         
     }
 

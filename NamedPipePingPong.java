@@ -25,7 +25,7 @@ public class NamedPipePingPong {
         setChannels();
         synchronize();
         for (int i=0; i<results.length; i++) {
-            int size = 1024*i;
+            int size = 1024*(i+1);
             int result = getRoundTripTime(rounds, size);
             results[i] = result;
             Total = 0L;
@@ -68,7 +68,7 @@ public class NamedPipePingPong {
                 pipe.write(pipe.read(data.length));
             }
         }
-        return (int) (Total/(rounds-1));
+        return (int) (Total/(rounds));
         
     }
 

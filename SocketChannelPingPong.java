@@ -6,8 +6,8 @@ import java.util.Arrays;
 public class SocketChannelPingPong {
 
     private String HOST;
-    private static final int PINGPORT = 8851;
-    private static final int PONGPORT = 8852;
+    private static final int PINGPORT = 8856;
+    private static final int PONGPORT = 8857;
     private String myName;
     private SocketMessageChannel socket;
     
@@ -19,7 +19,7 @@ public class SocketChannelPingPong {
         this.Total = 0L;
         if (myName.equals("Ping")) {
             socket = new SocketMessageChannel(true);
-        } else if (myName.equals("Pong")) {
+        } else {
             socket = new SocketMessageChannel(false);
         }
     }

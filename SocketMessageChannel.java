@@ -25,8 +25,10 @@ public class SocketMessageChannel {
             readChannel = serverSocketChannel.accept();
             readChannel.configureBlocking(true);
         } else {
-            readChannel = SocketChannel.open(new InetSocketAddress(host, port));
+            InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
+            readChannel = SocketChannel.open();
             readChannel.configureBlocking(true);
+            readChannel.connect(remoteAddress);
         }
     }
 
