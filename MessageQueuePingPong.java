@@ -56,12 +56,14 @@ public class MessageQueuePingPong {
                 messageQueue.write(data, PING_TYPE);
                 messageQueue.read(data.length, PONG_TYPE);
                 Long end = System.nanoTime();
-                Total += end - start;
+                if (i != 0) {
+                    Total += end - start;
+                }
             } else {
                 messageQueue.write(messageQueue.read(data.length, PING_TYPE), PONG_TYPE);
             }
         }
-        return (int) (Total/(rounds));
+        return (int) (Total/(rounds-1));
         
     }
 

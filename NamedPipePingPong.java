@@ -63,12 +63,14 @@ public class NamedPipePingPong {
                 pipe.write(data);
                 pipe.read(data.length);
                 Long end = System.nanoTime();
-                Total += end - start;
+                if (i != 0) {
+                    Total += end - start;
+                }
             } else {
                 pipe.write(pipe.read(data.length));
             }
         }
-        return (int) (Total/(rounds));
+        return (int) (Total/(rounds-1));
         
     }
 

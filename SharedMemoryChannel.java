@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class SharedMemoryChannel {
     
-    public static final int MAX_BUF_SIZE = 4092;
+    public static final int MAX_BUF_SIZE = 1024;
     ByteBuffer buffer;
     private int shmid;
     private int shmaddr;
@@ -28,38 +28,16 @@ public class SharedMemoryChannel {
         this.shmid = shmid;
         this.shmaddr = shmaddr;
         this.semid = semid;
-        System.out.println("Shared memory segment setup complete");
     }
 
     public void write(byte[] data) throws IOException {
-        int totalBytesWritten = 0;
-        int totalBytes = data.length;
-        while (totalBytesWritten < totalBytes) {
-            buffer.clear();
-            System.out.println("1");
-            int bytesToWrite = Math.min(MAX_BUF_SIZE, totalBytes - totalBytesWritten);
-            buffer.put(data, totalBytesWritten, bytesToWrite);
-            System.out.println("2");
-            sendMsg(shmaddr, semid, buffer, totalBytesWritten, bytesToWrite);
-            System.out.println("3");
-            totalBytesWritten += bytesToWrite;
-        }
+            sendMsg(shmaddr, semid, buffer, 0, MAX_BUF_SIZE);
     }
 
     public byte[] read(int totalBytes) throws IOException {
-        int totalBytesRead = 0;
         byte[] totalMessage = new byte[totalBytes];
-        while (totalBytesRead < totalBytes) {
-            buffer.clear();
-            System.out.println("1");
-            int bytesRead = getMsg(shmaddr, semid, buffer);
-            System.out.println("2");
-            buffer.flip();
-            int bytesToRead = Math.min(bytesRead, totalBytes - totalBytesRead);
-            buffer.get(totalMessage, totalBytesRead, bytesToRead);
-            System.out.println("3");
-            totalBytesRead += bytesRead;
-        }
+        getMsg(shmaddr, semid, buffer, totalBytes);
+        buffer.get(totalMessage, 0, totalBytes);
         return totalMessage;
     }
 
@@ -71,7 +49,7 @@ public class SharedMemoryChannel {
 
     public native int sendMsg (int shmaddr, int semid, ByteBuffer buffer, int offset, int len);
 
-    public native int getMsg (int shmaddr, int semid, ByteBuffer buffer);
+    public native int getMsg (int shmaddr, int semid, ByteBuffer buffer, int len);
 
     public native void closeShm (int shmid, int shmaddr, int semid, int removeIds);
 

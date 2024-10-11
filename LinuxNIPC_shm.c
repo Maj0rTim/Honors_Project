@@ -78,32 +78,35 @@ JNIEXPORT jint JNICALL Java_SharedMemoryChannel_sendMsg (JNIEnv *env, jobject ob
     sb.sem_num = WRITE_SEM;
     sb.sem_op = -1;
     sb.sem_flg = 0;
-
+    
     if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
         return -1;
     }
+    printf("1");
     int *p = (int *)shmaddr;
-    *p = len;
-    p++;
+    printf("1");
     void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
-
+    printf("1");
     if (bufferAddress == NULL) {
         setErrnum(env, obj, ENOMEM);  
         return -1;
     }
+    printf("1");
     memcpy(p, (char*)bufferAddress + offset, len);
+    printf("1");
     sb.sem_num = READ_SEM;
     sb.sem_op = 1;
-
+    printf("1");
     if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
         return -1;
     }
-    return 0; 
+    printf("1");
+    return 1; 
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf) {
+JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint len) {
     struct sembuf sb;
     sb.sem_num = READ_SEM;
     sb.sem_op = -1;
@@ -113,9 +116,7 @@ JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj
         setErrnum(env, obj, errno);
         return -1;
     }
-    int *p = (int *)shmaddr;
-    int len = *p;
-    p++; 
+    int *p = (int *)shmaddr; 
     void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
 
     if (bufferAddress == NULL) {

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 #undef SharedMemoryChannel_MAX_BUF_SIZE
-#define SharedMemoryChannel_MAX_BUF_SIZE 4092L
+#define SharedMemoryChannel_MAX_BUF_SIZE 1024L
 /*
  * Class:     SharedMemoryChannel
  * Method:    initShrSem
@@ -28,10 +28,10 @@ JNIEXPORT jint JNICALL Java_SharedMemoryChannel_sendMsg
 /*
  * Class:     SharedMemoryChannel
  * Method:    getMsg
- * Signature: (IILjava/nio/ByteBuffer;)I
+ * Signature: (IILjava/nio/ByteBuffer;I)I
  */
 JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg
-  (JNIEnv *, jobject, jint, jint, jobject);
+  (JNIEnv *, jobject, jint, jint, jobject, jint);
 
 /*
  * Class:     SharedMemoryChannel
