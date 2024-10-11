@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class SharedMemoryChannel {
     
     public static final int MAX_BUF_SIZE = 1024;
-    ByteBuffer buffer;
+    private ByteBuffer buffer;
     private int shmid;
     private int shmaddr;
     private int semid;
