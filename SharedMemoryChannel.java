@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class SharedMemoryChannel {
     
-    public static final int MAX_BUF_SIZE = 1024;
+    public static final int MAX_BUF_SIZE = 1024*40;
     private ByteBuffer buffer;
     private int shmid;
     private int shmaddr;
@@ -33,12 +33,14 @@ public class SharedMemoryChannel {
     }
 
     public void write(byte[] data) throws IOException {
+        buffer.clear();
             sendMsg(shmid, semid, buffer, 0, MAX_BUF_SIZE);
     }
 
     public native int sendMsg (int shmid, int semid, ByteBuffer buffer, int offset, int len);
 
     public byte[] read(int totalBytes) throws IOException {
+        buffer.clear();
         byte[] totalMessage = new byte[totalBytes];
         getMsg(shmid, semid, buffer, totalBytes);
         buffer.get(totalMessage, 0, totalBytes);

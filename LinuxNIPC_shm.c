@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject
         return;
     }
 
-    semid = semget(key, 1, IPC_CREAT | 0600);
+    semid = semget(key, 2, IPC_CREAT | 0600);
     if (semid == -1) { 
         setErrnum(env, obj, errno);
         return;

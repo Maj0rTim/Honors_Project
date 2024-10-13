@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public class SharedMemoryPingPong {
     
-    private static final int MAX_BUF_SIZE = 1024;
-    private static final int MAX_SHM_SIZE = 1024;
+    private static final int MAX_BUF_SIZE = 1024*40;
+    private static final int MAX_SHM_SIZE = 1024*40;
     private SharedMemoryChannel pingSegment;
     private SharedMemoryChannel pongSegment;
     private String myName;
@@ -17,8 +17,11 @@ public class SharedMemoryPingPong {
        
         if (myName.equals("Ping")) {
             pingSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, true);
-            pongSegment = new SharedMemoryChannel("Pong", MAX_SHM_SIZE, true);
+            pongSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, true);
             System.out.println("segemntes created!");
+        } else {
+            pingSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, false);
+            pongSegment = new SharedMemoryChannel("Pong", MAX_SHM_SIZE, false);
         }
     }
 
@@ -26,7 +29,7 @@ public class SharedMemoryPingPong {
         int[] results = new int[40];
         synchronize();
         for (int i=0; i<results.length; i++) {
-            int size = 1024*i;
+            int size = 1024*(i+1);
             int result = getRoundTripTime(rounds, size);
             results[i] = result;
             Total = 0L;
@@ -38,6 +41,8 @@ public class SharedMemoryPingPong {
     private void synchronize() throws IOException {
         byte[] data = new byte[MAX_BUF_SIZE];
         if (myName.equals("Ping")) {
+            pingSegment.write(data);
+            pongSegment.read(data.length);
             pingSegment.write(data);
             pongSegment.read(data.length);
         } else {
@@ -53,12 +58,14 @@ public class SharedMemoryPingPong {
                 pingSegment.write(data);
                 pongSegment.read(data.length);
                 Long end = System.nanoTime();
-                Total += end - start;
+                if (i != 0) {
+                    Total += end - start;
+                }
             } else {
                 pongSegment.write(pingSegment.read(data.length));
             }
         }
-        return (int)(Total/rounds);
+        return (int)(Total/(rounds - 1));
     }
 
     private void closeSharedMemory() {

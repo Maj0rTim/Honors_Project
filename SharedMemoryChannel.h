@@ -8,14 +8,14 @@
 extern "C" {
 #endif
 #undef SharedMemoryChannel_MAX_BUF_SIZE
-#define SharedMemoryChannel_MAX_BUF_SIZE 1024L
+#define SharedMemoryChannel_MAX_BUF_SIZE 40960L
 /*
  * Class:     SharedMemoryChannel
  * Method:    initShrSem
- * Signature: (III)V
+ * Signature: (Ljava/lang/String;II)V
  */
 JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jobject, jstring, jint, jint);
 
 /*
  * Class:     SharedMemoryChannel
