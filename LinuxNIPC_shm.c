@@ -18,33 +18,34 @@ void setErrnum (JNIEnv *, jobject, int);
 #define WRITE_SEM 0
 #define READ_SEM 1
 
-typedef struct message_buffer { 
-    long mtype;
-    char msg;
-} msgbuf;
-
-JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
+JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject obj, jstring key, jint size, jint initSems)
   { int shmid;
     int semid;
     int shmaddr;
-    shmid = shmget(key, size+4, IPC_CREAT | 0600);
 
+    key_t keys = ftok(key, 4242);
+
+    shmid = shmget(key, size+4, IPC_CREAT | 0600);
     if (shmid == -1) { 
         setErrnum(env, obj, errno);
         return;
     }
-    shmaddr = shmat(shmid, 0, 0);
 
+    shmaddr = shmat(shmid, 0, 0);
     if (shmaddr == -1) { 
         setErrnum(env, obj, errno);
         return;
     }
-    semid = semget(key, 2, IPC_CREAT | 0600);
 
+    semid = semget(key, 1, IPC_CREAT | 0600);
     if (semid == -1) { 
         setErrnum(env, obj, errno);
         return;
     }
+
+    printf("Shared memory ID %p\n", shmid);
+	printf("Shared memory address %p\n", shmaddr);
+    printf("Semaphore ID %p\n", semid);
 
     jclass cls = (*env)->GetObjectClass(env, obj);
     jmethodID mid = (*env)->GetMethodID(env, cls, "initFields", "(III)V");
@@ -73,7 +74,7 @@ JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject
     }
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryChannel_sendMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint offset, jint len) {
+JNIEXPORT jint JNICALL Java_SharedMemoryChannel_sendMsg (JNIEnv *env, jobject obj, jint shmid, jint semid, jobject buf, jint offset, jint len) {
     struct sembuf sb;
     sb.sem_num = WRITE_SEM;
     sb.sem_op = -1;
@@ -83,30 +84,25 @@ JNIEXPORT jint JNICALL Java_SharedMemoryChannel_sendMsg (JNIEnv *env, jobject ob
         setErrnum(env, obj, errno);
         return -1;
     }
-    printf("1");
-    int *p = (int *)shmaddr;
-    printf("1");
+    char *segment = (char*) shmat(shmid, NULL, 0);
     void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
-    printf("1");
+   
     if (bufferAddress == NULL) {
         setErrnum(env, obj, ENOMEM);  
         return -1;
     }
-    printf("1");
-    memcpy(p, (char*)bufferAddress + offset, len);
-    printf("1");
+    memcpy(segment, (char*)bufferAddress + offset, len);
     sb.sem_num = READ_SEM;
     sb.sem_op = 1;
-    printf("1");
+  
     if (semop(semid, &sb, 1) == -1) {
         setErrnum(env, obj, errno);
         return -1;
     }
-    printf("1");
     return 1; 
 }
 
-JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj, jint shmaddr, jint semid, jobject buf, jint len) {
+JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj, jint shmid, jint semid, jobject buf, jint len) {
     struct sembuf sb;
     sb.sem_num = READ_SEM;
     sb.sem_op = -1;
@@ -116,14 +112,14 @@ JNIEXPORT jint JNICALL Java_SharedMemoryChannel_getMsg (JNIEnv *env, jobject obj
         setErrnum(env, obj, errno);
         return -1;
     }
-    int *p = (int *)shmaddr; 
+    char *segment = (char*) shmat(shmid, NULL, 0);
     void* bufferAddress = (*env)->GetDirectBufferAddress(env, buf);
 
     if (bufferAddress == NULL) {
         setErrnum(env, obj, ENOMEM);  
         return -1;
     }
-    memcpy(bufferAddress, p, len);
+    memcpy(bufferAddress, segment, len);
     sb.sem_num = WRITE_SEM;
     sb.sem_op = 1;
 
