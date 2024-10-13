@@ -11,20 +11,16 @@ public class SharedMemoryChannel {
     private int semid;
     private int errnum;
     
-    public SharedMemoryChannel(String key, int size, boolean initSems) throws IOException {
+    public SharedMemoryChannel(int key, int size, boolean initSems) throws IOException {
         createSharedMemorySegment(key, size, initSems);
     }
 
-    public SharedMemoryChannel(String key, Boolean initSems) throws IOException {
-        createSharedMemorySegment(key, MAX_BUF_SIZE, false);
-    }
-
-    private void createSharedMemorySegment(String key, int size, boolean initSems) throws IOException {
+    private void createSharedMemorySegment(int key, int size, boolean initSems) throws IOException {
         initShrSem(key, size, initSems ? 1 : 0);
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
     }
 
-    public native void initShrSem (String key, int size, int initSems);
+    public native void initShrSem (int key, int size, int initSems);
 
     public void initFields (int shmid, int shmaddr, int semid) {
         this.shmid = shmid;
@@ -34,7 +30,8 @@ public class SharedMemoryChannel {
 
     public void write(byte[] data) throws IOException {
         buffer.clear();
-            sendMsg(shmid, semid, buffer, 0, MAX_BUF_SIZE);
+        buffer.put(data, 0, data.length);
+        sendMsg(shmid, semid, buffer, 0, MAX_BUF_SIZE);
     }
 
     public native int sendMsg (int shmid, int semid, ByteBuffer buffer, int offset, int len);

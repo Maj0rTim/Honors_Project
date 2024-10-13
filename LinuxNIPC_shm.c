@@ -18,12 +18,10 @@ void setErrnum (JNIEnv *, jobject, int);
 #define WRITE_SEM 0
 #define READ_SEM 1
 
-JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject obj, jstring key, jint size, jint initSems)
+JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem (JNIEnv *env, jobject obj, jint key, jint size, jint initSems)
   { int shmid;
     int semid;
     int shmaddr;
-
-    key_t keys = ftok(key, 4242);
 
     shmid = shmget(key, size+4, IPC_CREAT | 0600);
     if (shmid == -1) { 

@@ -14,14 +14,17 @@ public class SharedMemoryPingPong {
     public SharedMemoryPingPong(String name) throws IOException {
         this.myName = name;
         this.Total = 0L;
+
+        int pingkey = ((int)"ping".hashCode()) ^ 42;
+        int pongkey = ((int)"pong".hashCode()) ^ 42;
        
         if (myName.equals("Ping")) {
-            pingSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, true);
-            pongSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, true);
+            pingSegment = new SharedMemoryChannel(pingkey, MAX_SHM_SIZE, true);
+            pongSegment = new SharedMemoryChannel(pongkey, MAX_SHM_SIZE, true);
             System.out.println("segemntes created!");
         } else {
-            pingSegment = new SharedMemoryChannel("Ping", MAX_SHM_SIZE, false);
-            pongSegment = new SharedMemoryChannel("Pong", MAX_SHM_SIZE, false);
+            pingSegment = new SharedMemoryChannel(pingkey, MAX_SHM_SIZE, false);
+            pongSegment = new SharedMemoryChannel(pongkey, MAX_SHM_SIZE, false);
         }
     }
 
@@ -43,8 +46,6 @@ public class SharedMemoryPingPong {
         if (myName.equals("Ping")) {
             pingSegment.write(data);
             pongSegment.read(data.length);
-            pingSegment.write(data);
-            pongSegment.read(data.length);
         } else {
             pongSegment.write(pingSegment.read(data.length));
         }
@@ -58,14 +59,15 @@ public class SharedMemoryPingPong {
                 pingSegment.write(data);
                 pongSegment.read(data.length);
                 Long end = System.nanoTime();
-                if (i != 0) {
+                if (i != 1) {
                     Total += end - start;
                 }
             } else {
                 pongSegment.write(pingSegment.read(data.length));
             }
         }
-        return (int)(Total/(rounds - 1));
+        
+        return (int)(Total/(rounds-1));
     }
 
     private void closeSharedMemory() {

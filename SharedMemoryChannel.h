@@ -12,10 +12,10 @@ extern "C" {
 /*
  * Class:     SharedMemoryChannel
  * Method:    initShrSem
- * Signature: (Ljava/lang/String;II)V
+ * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_SharedMemoryChannel_initShrSem
-  (JNIEnv *, jobject, jstring, jint, jint);
+  (JNIEnv *, jobject, jint, jint, jint);
 
 /*
  * Class:     SharedMemoryChannel

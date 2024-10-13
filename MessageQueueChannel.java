@@ -9,7 +9,6 @@ public class MessageQueueChannel
     private LinuxNIPC ipc = new LinuxNIPC();
     
     public MessageQueueChannel(int key) { 
-        
         if ((msgqid = ipc.msgget(key, LinuxNIPC.IPC_CREAT | 0660)) == -1)
         System.err.println("MessageQueueOutput: msgget failed: errnum = " + ipc.getErrnum() + " " + ipc.strerror(ipc.getErrnum()));
         buffer = ByteBuffer.allocateDirect(MAX_BUF_SIZE);
